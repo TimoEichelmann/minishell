@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:17 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/05 15:49:41 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/08 13:48:18 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,6 +181,8 @@ int	print_env(t_list *env, char *input, int i)
 	return (len);
 }
 
+
+
 void	echo(char *input, t_list *env)
 {
 	int	i;
@@ -196,7 +198,7 @@ void	echo(char *input, t_list *env)
 	}
 	while (input[i])
 	{
-		if (input[i] == '$')
+		if (input[i] == '$' && check_single_quotes(input) == 0)
 			i += print_env(env, input, i);
 		if (input[i] != 34 && input[i] != 39 && input[i] && input[i] != '$')
 		{
@@ -284,12 +286,152 @@ void	ft_exit(t_list *env)
 	return ;
 }
 
+int right_input(char *input)
+{
+    int single;
+    int doub;
+
+    single = 0;
+    doub = 0;
+    while(*input  && *input != '\0')
+    {
+        if (*input == 34)
+            doub++;
+        else if(*input == 39)
+            single++;
+        input++;
+    }
+    if (doub % 2 == 0 && single % 2 == 0)
+        return (1);
+    else
+        return (0);
+}
+
+int	check_input(char *input)
+{
+		
+}
+
+int	iterate_quotes(char *input, int ind, int i)
+{
+	int	quote_count;
+	int	quote_check;
+
+	quote_count = 0;
+	quote_check = 0;
+	while (input[i])
+	{
+		if (ind == 1 && input[i] == 34 || ind == 2 && input[i] == 39)
+			quote_count++;
+		i++;
+	}
+	i = 0;
+	if (quote_count % 2 == 1)
+	{
+		if (quote_count == 1)
+			quote_count++;
+		while (quote_check != quote_count - 1)
+		{
+			if (ind == 1 && input[i] == 34 || ind == 2 && input[i] == 39)
+				quote_check++;
+			i++;
+		}
+		return (i);
+	}
+	return (-1);
+}
+
+int	unclosed_quotes(char *input)
+{
+	int	squote;
+	int	dquote;
+	int	i;
+
+	i = 0;
+	squote = iterate_quotes(input, 2, i);
+	dquote = iterate_quotes(input, 1, i);
+	printf("%d %d\n", dquote, squote);
+	if (dquote == -1 && squote >= 0)
+		return (squote);
+	if (squote == -1 && dquote >= 0)
+		return (dquote);
+	if (dquote > squote && squote > 0)
+		return (squote);
+	if (squote > dquote && dquote > 0)
+		return (dquote);
+	if (squote == dquote)
+		return (squote);
+	return (0);
+}
+
+int	count_lines(int unclosed, char *input, int i)
+{
+	int	dquote;
+	int	squote;
+
+	dquote = 0;
+	squote = 0;
+	while (input[j] && input[i] && input[i] != unclosed)
+	{
+		if ((input[i] == 39 && squote == 1) || (input[i] == 34 && dquote == 1))
+		{
+			if (input[i] == 39)
+				squote = 0;
+			if (input[i] == 34)
+				dquote = 0;
+			line_count++;
+		}
+		if (input[i] == 34 && dquote == 0)
+			dquote += 1;
+		if (input[i] == 39 && squote == 0)
+			squote += 1;
+		if ((input[i] == ' ' || input[i] == '	') && dquote != 1 
+			|| (input[i] == ' ' || input[i] == '	') && squote != 1)
+			line_count++;
+		i++;
+	}
+	return (line_count);
+}
+
+char	**parser(char *input)
+{
+	int	line_count;
+	int	unclosed;
+	int	i;
+
+	i = 0;
+	unclosed = unclosed_quotes(input);
+	line_count = count_lines(unclosed, input, i);
+}
+
+char	**parser(char *input)
+{
+	int		i;
+	char	**tokens;
+	int		quotation_count;
+	int		line_count;
+
+	i = 0;
+	quotation_count = 0;
+	line_count = ft_line_count(input);
+	while (input[i])
+	{
+		if (input[i] == 34 || input[i] == 39)
+			quotation_count += 1;
+		if (input[i] == ' ' && quotation_count != 1)
+			
+	}
+}
+
+//command -opt -arg | command2 -opt2 -arg2
+
 int main(int ac, char **av, char **ev)
 {
     // t_shell shell;
     char *input;
     char *promt;
 	t_list	*env;
+	char	**splitted;
 
 	env = NULL;
     if(ac == 1 && !av[1])
@@ -307,30 +449,30 @@ int main(int ac, char **av, char **ev)
 				ft_exit(env);
 				exit(5);
 			}
-			if (ft_strncmp(input, "env", 3) == 0)
-				ft_env(env);
-			if (ft_strncmp(input, "unset", 5) == 0)
-				ft_unset(&env, input + 5);
-			if (ft_strncmp(input, "getenv", 6) == 0)
-				printf("%s\n", ft_getenv(env, input + 6));
-            // else if (ft_strncmp(input, "cd", 2) == 0)
-            //     promt = maintain_cd(input + 2, promt);
-            else if (ft_strncmp(input, "export", 6) == 0)
-                ft_export(&env, input + 6);
-            // else if (ft_strncmp(input, "unset", 5) == 0)
-            //     remove_env(ev, input + 5);
-			else if (ft_strncmp(input, "echo", 4) == 0)
-				echo(input + 5, env);
-            // else
-            // {
-            //     shell.command_arg = ft_split(input, ' ');
-            //     shell.path = getenv("PATH");
-            //     shell.command_path = ft_split(shell.path, ':');
-            //     execution(&shell,ev);
-            //     free_memory(&shell);
-            // }
-    	}
+			splitted = parser(input);
+			check_input(splitted);
+		}
     del_env(env);
 	}
     return 0;
 }
+
+
+			if (ft_strncmp(input, "env", 3) == 0)
+				ft_env(env);
+			if (ft_strncmp(input, "unset", 5) == 0)
+				ft_unset(&env, input + 5);
+            else if (ft_strncmp(input, "cd", 2) == 0)
+                promt = maintain_cd(input + 2, promt);
+            else if (ft_strncmp(input, "export", 6) == 0)
+                ft_export(&env, input + 6);
+			else if (ft_strncmp(input, "echo", 4) == 0)
+				echo(input + 5, env);
+			else
+            {
+                shell.command_arg = ft_split(input, ' ');
+                shell.path = getenv("PATH");
+                shell.command_path = ft_split(shell.path, ':');
+                execution(&shell,ev);
+                free_memory(&shell);
+            }
