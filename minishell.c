@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:17 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/08 13:48:18 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/09 17:33:40 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -371,16 +371,10 @@ int	count_lines(int unclosed, char *input, int i)
 
 	dquote = 0;
 	squote = 0;
-	while (input[j] && input[i] && input[i] != unclosed)
+	while (input[i] && input[i] != unclosed)
 	{
 		if ((input[i] == 39 && squote == 1) || (input[i] == 34 && dquote == 1))
-		{
-			if (input[i] == 39)
-				squote = 0;
-			if (input[i] == 34)
-				dquote = 0;
 			line_count++;
-		}
 		if (input[i] == 34 && dquote == 0)
 			dquote += 1;
 		if (input[i] == 39 && squote == 0)
