@@ -3,108 +3,233 @@
 /*                                                        :::      ::::::::   */
 /*   test.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:42:42 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/09 17:52:24 by timo             ###   ########.fr       */
+/*   Updated: 2024/04/10 17:32:08 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	iterate_quotes(char *input, int ind, int i)
-{
-	int	quote_count;
-	int	quote_check;
 
-	quote_count = 0;
-	quote_check = 0;
-	while (input[i])
-	{
-		if (ind == 1 && input[i] == 34 || ind == 2 && input[i] == 39)
-			quote_count++;
-		i++;
-	}
+char	*cmd_read(char *input, int *j)
+{
+	int		i;
+	char	*result;
+
 	i = 0;
-	if (quote_count % 2 == 1)
-	{
-		while (quote_check != quote_count)
-		{
-			if (ind == 1 && input[i] == 34 || ind == 2 && input[i] == 39)
-				quote_check++;
-			i++;
-		}
-		return (i - 1);
-	}
-	return (-1);
+	while (input[*j] && (input[*j] == ' ' || input[*j] == '	'))
+		*j += 1;
+	while (input[i + *j] && input[i + *j] != ' ' && input[i + *j] != '	')
+		i++;
+	result = ft_substr(input, *j, i);
+	*j = *j + i;
+	return (result);
 }
 
-int	unclosed_quotes(char *input)
+char	*opt_read(char *input, int *j)
 {
-	int	squote;
-	int	dquote;
+	int		i;
+	char	*result;
+
+	i = 0;
+	while (input[*j] && (input[*j] == ' ' || input[*j] == '	'))
+		*j += 1;
+	if (input[*j] != '-')
+		return (NULL);
+	while (input[i + *j] && input[i + *j] != ' ' && input[i + *j] != '	')
+		i++;
+	result = ft_substr(input, *j, i);
+	*j += i;
+	return (result);
+}
+
+int	space_check(char *input, int ind)
+{
 	int	i;
 
 	i = 0;
-	squote = iterate_quotes(input, 2, i);
-	dquote = iterate_quotes(input, 1, i);
-	if (dquote == -1 && squote >= 0)
-		return (squote);
-	if (squote == -1 && dquote >= 0)
-		return (dquote);
-	if (dquote > squote && squote > 0)
-		return (squote);
-	if (squote > dquote && dquote > 0)
-		return (dquote);
-	if (squote == dquote)
-		return (squote);
+	if (ind == 0)
+	{
+		if (input[i + 1] && input[i - 1] && (input[i + 1] == ' '
+			|| input[i + 1] == '	') && (input[i - 1] == ' '
+			|| input[i - 1] == '	'))
+			return (0);
+		if (!input[i + 1] && (input[i - 1] == ' ' || input[i - 1] == '	'))
+			return (0);
+		return (1);
+	}
+	if (input[i + 2] && (input[i - 1] == ' ' || input[i - 1] == '	')
+		&& (input[i + 2] == ' ' || input[i + 2] == '	'))
+		return (0);
+	if (!input[i + 2] && (input[i - 1] == '	' || input[i + 2] == ' '))
+		return (0);
+	return (1);
+}
+
+int	is_token(char *c)
+{
+	int	i;
+
+	i = 0;
+	while (c[i])
+	{
+		if ((c[i] == '<' || c[i] == '>' || c[i] == '|') &&
+			space_check(c + i, 0) == 0)
+			return (i);
+		if ((c[i] == '<' && c[i + 1] == '<' &&
+			space_check(c + i, 1) == 0) || (c[i] == '>' &&
+				c[i + 1] == '>' && space_check(c + i, 1) == 0))
+			return (i);
+		i++;
+	}
+	if (!c[i])
+		return (i);
 	return (0);
 }
 
-int	count_lines(int unclosed, char *input, int i, int line_count)
+char	*arg_read(char *input, int *j)
 {
-	int	dquote;
-	int	squote;
+	int		i;
+	char	*result;
 
-	dquote = 0;
-	squote = 0;
-	while (input[i] && i != unclosed)
-	{
-		if ((dquote % 2 != 1 && squote % 2 != 1) && input[i] == ' ' ||
-			(dquote % 2 != 1 && squote % 2 != 1) && input[i] == '	')
-			line_count++;
-		if (input[i] == 34)
-			dquote++;
-		if (input[i] == 39)
-			squote++;
-		if ((dquote % 2 == 0 && input[i] == 34) || (squote % 2 == 0 && input[i] == 39))
-			line_count++;
-		printf("linec : %d, squote : %d dquote : %d i : %d %c\n", line_count, squote, dquote, i, input[i]);
+	i = 0;
+	if (!input[*j])
+		return (NULL);
+	while (input[*j] && (input[*j] == ' ' || input[*j] == '	'))
+		*j += 1;
+	if (!input[*j])
+		return (NULL);
+	while (i < is_token(input + *j))
 		i++;
-	}
-	return (line_count);
+	printf("i : %d %c\n", i, input[i + *j]);
+	if (i == 0)
+		return (NULL);
+	result = ft_substr(input, *j, i - 1);
+	*j += i;
+	return (result);
 }
 
-//echo ""
 
-char	**parser(char *input)
+
+char	*token_read(char *input, int *j)
 {
-	int	line_count;
-	int	unclosed;
+	int		i;
+	char	*result;
+
+	i = 0;
+	while (input[*j] && (input[*j] == ' ' || input[*j] == '	'))
+		*j += 1;
+	if (!input[*j])
+		return (NULL);
+	while (input[i + *j] && input[i + *j] != ' ' && input[i + *j] != '	')
+		i++;
+	// if (input[i + *j] == ' ' || input[i + *j] == '	')
+	// 	i--;
+	result = ft_substr(input, *j, i);
+	*j += i;
+	return (result);
+}
+
+//remove spaces at end
+void	command_parser(char	*input, t_cmd **cmd, int cmd_count)
+{
+	t_cmd	*c;
+	int			i;
+	int			j;
+
+	j = 0;
+	i  = 0;
+	c = *cmd;
+	while (i < cmd_count)
+	{
+		c[i].cmd = cmd_read(input, &j);
+		c[i].option = opt_read(input, &j);
+		c[i].arg = arg_read(input, &j);
+		c[i].token = token_read(input, &j);
+		i++;
+	}
+	c[i].cmd = NULL;
+	return ;
+}
+
+int	command_counter(char *input)
+{
+	int	i;
+	int	command_count;
+
+	command_count = 1;
+	i = 0;
+	while (input[i])
+	{
+		if ((input[i] == '<' || input[i] == '>' || input[i] == '|')
+				&& space_check(input + i, 0) == 0 && input[i + 1])
+		{
+			command_count++;
+		}
+		if ((input[i] == '<' && input[i + 1] == '<' && input[i + 2] &&
+				space_check(input + i, 1) == 0) || (input[i] == '>' &&
+					input[i + 2] && input[i + 1] == '>' &&
+						space_check(input + i, 1) == 0))
+		{
+			command_count++;
+			i++;
+		}
+		i++;
+	}
+	return (command_count);
+}
+
+t_cmd	*parser(char *input)
+{
+	t_cmd	*cmd;
+	int			cmd_count;
+
+	cmd_count = command_counter(input);
+	cmd = malloc(sizeof(t_cmd) * (cmd_count + 1));
+	command_parser(input, &cmd, cmd_count);
+	return (cmd);
+}
+
+void	free_cmd(t_cmd *cmd)
+{
 	int	i;
 
 	i = 0;
-	line_count = 0;
-	unclosed = unclosed_quotes(input);
-	printf("%d\n", unclosed);
-	line_count = count_lines(unclosed, input, i, line_count);
-	printf("%d\n", line_count);
-	return (NULL);
+	while (cmd[i].cmd)
+		i++;
+	while (cmd[i].cmd)
+	{
+		if (cmd[i].cmd)
+			free(cmd[i].cmd);
+		if (cmd[i].option)
+			free(cmd[i].option);
+		if (cmd[i].arg)
+			free(cmd[i].arg);
+		if (cmd[i].token)
+			free(cmd[i].token);
+		i--;
+	}
+	free(cmd);
 }
 
-int main()
+int main(int argc, char **argv)
 {
-	char *p = readline(">");
-	// printf("%d\n", unclosed_quotes(p));
-	parser(p);
+	char *input = argv[1];
+	t_cmd *r;
+	argc--;
+	
+	int	i = 0;
+	r = parser(input);
+	while (r[i].cmd)
+	{
+		printf("c %s o %s a %s t %s\n", r[i].cmd, r[i].option, r[i].arg, r[i].token);
+		free(r[i].cmd);
+		free(r[i].option);
+		free(r[i].arg);
+		free(r[i].token);
+		i++;
+	}
+	free_cmd(r);
 }

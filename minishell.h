@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:44 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/05 12:26:27 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/10 13:36:03 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,13 @@ typedef struct s_shell {
 	char	**command_arg; //command arguments
 	char	*command;
 }	t_shell;
+
+typedef	struct s_cmd {
+	char	*cmd;
+	char	*option;
+	char	*arg;
+	char	*token;
+}	t_cmd;
 
 typedef struct s_env {
 	char	*var;

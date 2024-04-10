@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:17 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/09 17:33:40 by timo             ###   ########.fr       */
+/*   Updated: 2024/04/10 17:32:33 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -328,15 +328,13 @@ int	iterate_quotes(char *input, int ind, int i)
 	i = 0;
 	if (quote_count % 2 == 1)
 	{
-		if (quote_count == 1)
-			quote_count++;
-		while (quote_check != quote_count - 1)
+		while (quote_check != quote_count)
 		{
 			if (ind == 1 && input[i] == 34 || ind == 2 && input[i] == 39)
 				quote_check++;
 			i++;
 		}
-		return (i);
+		return (i - 1);
 	}
 	return (-1);
 }
@@ -350,7 +348,6 @@ int	unclosed_quotes(char *input)
 	i = 0;
 	squote = iterate_quotes(input, 2, i);
 	dquote = iterate_quotes(input, 1, i);
-	printf("%d %d\n", dquote, squote);
 	if (dquote == -1 && squote >= 0)
 		return (squote);
 	if (squote == -1 && dquote >= 0)
@@ -364,60 +361,207 @@ int	unclosed_quotes(char *input)
 	return (0);
 }
 
-int	count_lines(int unclosed, char *input, int i)
+char	*cmd_read(char *input, int *j)
 {
-	int	dquote;
-	int	squote;
+	int		i;
+	char	*result;
 
-	dquote = 0;
-	squote = 0;
-	while (input[i] && input[i] != unclosed)
-	{
-		if ((input[i] == 39 && squote == 1) || (input[i] == 34 && dquote == 1))
-			line_count++;
-		if (input[i] == 34 && dquote == 0)
-			dquote += 1;
-		if (input[i] == 39 && squote == 0)
-			squote += 1;
-		if ((input[i] == ' ' || input[i] == '	') && dquote != 1 
-			|| (input[i] == ' ' || input[i] == '	') && squote != 1)
-			line_count++;
+	i = 0;
+	while (input[*j] && (input[*j] == ' ' || input[*j] == '	'))
+		*j += 1;
+	while (input[i + *j] && input[i + *j] != ' ' && input[i + *j] != '	')
 		i++;
-	}
-	return (line_count);
+	result = ft_substr(input, *j, i);
+	*j = *j + i;
+	return (result);
 }
 
-char	**parser(char *input)
+char	*opt_read(char *input, int *j)
 {
-	int	line_count;
-	int	unclosed;
+	int		i;
+	char	*result;
+
+	i = 0;
+	while (input[*j] && (input[*j] == ' ' || input[*j] == '	'))
+		*j += 1;
+	if (input[*j] != '-')
+		return (NULL);
+	while (input[i + *j] && input[i + *j] != ' ' && input[i + *j] != '	')
+		i++;
+	result = ft_substr(input, *j, i);
+	*j += i;
+	return (result);
+}
+
+int	space_check(char *input, int ind)
+{
 	int	i;
 
 	i = 0;
-	unclosed = unclosed_quotes(input);
-	line_count = count_lines(unclosed, input, i);
+	if (ind == 0)
+	{
+		if (input[i + 1] && input[i - 1] && (input[i + 1] == ' '
+			|| input[i + 1] == '	') && (input[i - 1] == ' '
+			|| input[i - 1] == '	'))
+			return (0);
+		if (!input[i + 1] && (input[i - 1] == ' ' || input[i - 1] == '	'))
+			return (0);
+		return (1);
+	}
+	if (input[i + 2] && (input[i - 1] == ' ' || input[i - 1] == '	')
+		&& (input[i + 2] == ' ' || input[i + 2] == '	'))
+		return (0);
+	if (!input[i + 2] && (input[i - 1] == '	' || input[i + 2] == ' '))
+		return (0);
+	return (1);
 }
 
-char	**parser(char *input)
+int	is_token(char *c)
 {
-	int		i;
-	char	**tokens;
-	int		quotation_count;
-	int		line_count;
+	int	i;
 
 	i = 0;
-	quotation_count = 0;
-	line_count = ft_line_count(input);
-	while (input[i])
+	while (c[i])
 	{
-		if (input[i] == 34 || input[i] == 39)
-			quotation_count += 1;
-		if (input[i] == ' ' && quotation_count != 1)
-			
+		if ((c[i] == '<' || c[i] == '>' || c[i] == '|') &&
+			space_check(c + i, 0) == 0)
+			return (i);
+		if ((c[i] == '<' && c[i + 1] == '<' &&
+			space_check(c + i, 1) == 0) || (c[i] == '>' &&
+				c[i + 1] == '>' && space_check(c + i, 1) == 0))
+			return (i);
+		i++;
 	}
+	if (!c[i])
+		return (i);
+	return (0);
 }
 
+char	*arg_read(char *input, int *j)
+{
+	int		i;
+	char	*result;
+
+	i = 0;
+	if (!input[*j])
+		return (NULL);
+	while (input[*j] && (input[*j] == ' ' || input[*j] == '	'))
+		*j += 1;
+	if (!input[*j])
+		return (NULL);
+	while (i < is_token(input + *j))
+		i++;
+	printf("i : %d %c\n", i, input[i + *j]);
+	if (i == 0)
+		return (NULL);
+	result = ft_substr(input, *j, i - 1);
+	*j += i;
+	return (result);
+}
+
+
+
+char	*token_read(char *input, int *j)
+{
+	int		i;
+	char	*result;
+
+	i = 0;
+	while (input[*j] && (input[*j] == ' ' || input[*j] == '	'))
+		*j += 1;
+	if (!input[*j])
+		return (NULL);
+	while (input[i + *j] && input[i + *j] != ' ' && input[i + *j] != '	')
+		i++;
+	// if (input[i + *j] == ' ' || input[i + *j] == '	')
+	// 	i--;
+	result = ft_substr(input, *j, i);
+	*j += i;
+	return (result);
+}
+
+//remove spaces at end
+void	command_parser(char	*input, t_cmd **cmd, int cmd_count)
+{
+	t_cmd	*c;
+	int			i;
+	int			j;
+
+	j = 0;
+	i  = 0;
+	c = *cmd;
+	while (i < cmd_count)
+	{
+		c[i].cmd = cmd_read(input, &j);
+		c[i].option = opt_read(input, &j);
+		c[i].arg = arg_read(input, &j);
+		c[i].token = token_read(input, &j);
+		i++;
+	}
+	c[i].cmd = NULL;
+	return ;
+}
+
+int	command_counter(char *input)
+{
+	int	i;
+	int	command_count;
+
+	command_count = 1;
+	i = 0;
+	while (input[i])
+	{
+		if ((input[i] == '<' || input[i] == '>' || input[i] == '|')
+				&& space_check(input + i, 0) == 0 && input[i + 1])
+		{
+			command_count++;
+		}
+		if ((input[i] == '<' && input[i + 1] == '<' && input[i + 2] &&
+				space_check(input + i, 1) == 0) || (input[i] == '>' &&
+					input[i + 2] && input[i + 1] == '>' &&
+						space_check(input + i, 1) == 0))
+		{
+			command_count++;
+			i++;
+		}
+		i++;
+	}
+	return (command_count);
+}
+
+t_cmd	*parser(char *input)
+{
+	t_cmd	*cmd;
+	int			cmd_count;
+
+	cmd_count = command_counter(input);
+	cmd = malloc(sizeof(t_cmd) * (cmd_count + 1));
+	command_parser(input, &cmd, cmd_count);
+	return (cmd);
+}
 //command -opt -arg | command2 -opt2 -arg2
+
+void	free_cmd(t_cmd *cmd)
+{
+	int	i;
+
+	i = 0;
+	while (cmd[i].cmd)
+		i++;
+	while (cmd[i].cmd)
+	{
+		if (cmd[i].cmd)
+			free(cmd[i].cmd);
+		if (cmd[i].option)
+			free(cmd[i].option);
+		if (cmd[i].arg)
+			free(cmd[i].arg);
+		if (cmd[i].token)
+			free(cmd[i].token);
+		i--;
+	}
+	free(cmd);
+}
 
 int main(int ac, char **av, char **ev)
 {
@@ -425,7 +569,7 @@ int main(int ac, char **av, char **ev)
     char *input;
     char *promt;
 	t_list	*env;
-	char	**splitted;
+	t_cmd	*cmd;
 
 	env = NULL;
     if(ac == 1 && !av[1])
@@ -438,6 +582,7 @@ int main(int ac, char **av, char **ev)
         {
             input = readline(promt);
             add_history(input);
+			cmd = parser(input);
 			if (!input || ft_strncmp(input, "exit", 5) == 0)
 			{
 				ft_exit(env);
@@ -445,6 +590,7 @@ int main(int ac, char **av, char **ev)
 			}
 			splitted = parser(input);
 			check_input(splitted);
+			free_cmd(cmd);
 		}
     del_env(env);
 	}
@@ -452,21 +598,21 @@ int main(int ac, char **av, char **ev)
 }
 
 
-			if (ft_strncmp(input, "env", 3) == 0)
-				ft_env(env);
-			if (ft_strncmp(input, "unset", 5) == 0)
-				ft_unset(&env, input + 5);
-            else if (ft_strncmp(input, "cd", 2) == 0)
-                promt = maintain_cd(input + 2, promt);
-            else if (ft_strncmp(input, "export", 6) == 0)
-                ft_export(&env, input + 6);
-			else if (ft_strncmp(input, "echo", 4) == 0)
-				echo(input + 5, env);
-			else
-            {
-                shell.command_arg = ft_split(input, ' ');
-                shell.path = getenv("PATH");
-                shell.command_path = ft_split(shell.path, ':');
-                execution(&shell,ev);
-                free_memory(&shell);
-            }
+			// if (ft_strncmp(input, "env", 3) == 0)
+			// 	ft_env(env);
+			// if (ft_strncmp(input, "unset", 5) == 0)
+			// 	ft_unset(&env, input + 5);
+            // else if (ft_strncmp(input, "cd", 2) == 0)
+            //     promt = maintain_cd(input + 2, promt);
+            // else if (ft_strncmp(input, "export", 6) == 0)
+            //     ft_export(&env, input + 6);
+			// else if (ft_strncmp(input, "echo", 4) == 0)
+			// 	echo(input + 5, env);
+			// else
+            // {
+            //     shell.command_arg = ft_split(input, ' ');
+            //     shell.path = getenv("PATH");
+            //     shell.command_path = ft_split(shell.path, ':');
+            //     execution(&shell,ev);
+            //     free_memory(&shell);
+            // }
