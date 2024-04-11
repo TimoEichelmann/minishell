@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   test.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:42:42 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/10 17:32:08 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/11 12:41:59 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,11 +181,62 @@ int	command_counter(char *input)
 	return (command_count);
 }
 
+int	iterate_quotes(char *input, int ind, int i)
+{
+	int	quote_count;
+	int	quote_check;
+
+	quote_count = 0;
+	quote_check = 0;
+	while (input[i])
+	{
+		if ((ind == 1 && input[i] == 34) || (ind == 2 && input[i] == 39))
+			quote_count++;
+		i++;
+	}
+	i = 0;
+	if (quote_count % 2 == 1)
+	{
+		while (quote_check != quote_count)
+		{
+			if ((ind == 1 && input[i] == 34) || (ind == 2 && input[i] == 39))
+				quote_check++;
+			i++;
+		}
+		return (i - 1);
+	}
+	return (-1);
+}
+
+int	unclosed_quotes(char *input)
+{
+	int	squote;
+	int	dquote;
+	int	i;
+
+	i = 0;
+	squote = iterate_quotes(input, 2, i);
+	dquote = iterate_quotes(input, 1, i);
+	if (dquote == -1 && squote >= 0)
+		return (squote);
+	if (squote == -1 && dquote >= 0)
+		return (dquote);
+	if (dquote > squote && squote > 0)
+		return (squote);
+	if (squote > dquote && dquote > 0)
+		return (dquote);
+	if (squote == dquote)
+		return (squote);
+	return (0);
+}
+
 t_cmd	*parser(char *input)
 {
 	t_cmd	*cmd;
 	int			cmd_count;
 
+	if (unclosed_quotes(input) != -1)
+		return (NULL);
 	cmd_count = command_counter(input);
 	cmd = malloc(sizeof(t_cmd) * (cmd_count + 1));
 	command_parser(input, &cmd, cmd_count);
@@ -214,11 +265,11 @@ void	free_cmd(t_cmd *cmd)
 	free(cmd);
 }
 
-int main(int argc, char **argv)
+int main(/* int argc, char **argv */)
 {
-	char *input = argv[1];
+	char *input = readline(">");
 	t_cmd *r;
-	argc--;
+	// argc--;
 	
 	int	i = 0;
 	r = parser(input);
