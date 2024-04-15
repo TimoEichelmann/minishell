@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   test.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:42:42 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/11 12:41:59 by timo             ###   ########.fr       */
+/*   Updated: 2024/04/15 15:56:42 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -230,16 +230,146 @@ int	unclosed_quotes(char *input)
 	return (0);
 }
 
-t_cmd	*parser(char *input)
+int	own_check(char *cmd)
+{
+	int	i;
+
+	i = 0;
+	if (ft_strncmp(cmd, "env", 3) == 0)
+		return(1);
+	if (ft_strncmp(cmd, "unset", 5) == 0)
+		return(2);
+	if (ft_strncmp(cmd, "cd", 2) == 0)
+		return(3);
+    if (ft_strncmp(cmd, "export", 6) == 0)
+		return(4);
+	if (ft_strncmp(cmd, "echo", 4) == 0)
+		return(5);
+	if (ft_strncmp(cmd, "exit", 5) == 0)
+		return(6);
+	else
+		return (-1);
+}
+
+void	env_lexer(t_cmd *cmd)
+{
+	if (cmd.option)
+		printf("env: '%s': No such file or directory", cmd.option);
+	if (cmd.arg)
+		printf("env: '%s': No such file or directory", cmd.arg);
+	return (-1);
+}
+
+char	*exchange(char *arg, int index, t_env *env)
+{
+	char	*var;
+	char	*result;
+	int		i;
+
+	i = 0;
+	var = substr(arg, index + 1, substr_len(index + 1));
+	result = malloc(sizeof(char) * (ft_strlen(arg) - ft_strlen(var)
+				+ ft_strlen(ft_getenv(var))));
+	while(i < index)
+	{
+		result[i] = arg[i];
+		i++;
+	}
+	index += ft_strlcpy(result, ft_getenv(var), ft_strlen(ft_getenv(var))) - 1;
+	i += ft_strlen(var) + 1;
+	while(arg[i])
+	{
+		result[index] = arg[i];
+		index++;
+		i++;
+	}
+	result[index] = 0;
+	free(arg);
+	return (result);
+}
+
+void	expander(t_cmd **cmd, t_env *env)
+{
+	t_cmd *c;
+	int		i;
+	int		quote_count;
+
+	i = 0;
+	c = cmd;
+	quote_count = 0;
+	while (c.arg[i])
+	{
+		if (c.arg[i] == 39)
+			quote_count++;
+		if (c.arg[i] == '$' && quote_count % 2 != 1 && c.arg[i + 1]
+			&& ft_isprint(c.arg[i + 1]) == 1)
+			c.arg = exchange(c.arg, i, env);
+		i++;
+	}
+}
+
+int	own_lexer(t_cmd **c, int ind, t_env *env)
+{
+	t_cmd *cmd;
+
+	cmd = *c;
+	if (ind == 1 && (cmd.option || cmd.arg))
+		if (env_lexer(cmd) == -1)
+			return (-1);
+	if (ind == 2 && cmd.option)
+	{
+		printf("unset: bad option: %s", cmd.option);
+		return (-1);
+	}
+	if (ind == 4 && cmd.option)
+	{
+		printf("export: bad option: %s", cmd.option);
+		return (-1);
+	}
+	if (ind == 5 && cmd.option && ft_strncmp(cmd.option, "-n", 2) != 0)
+	{
+		printf("echo: bad option: %s", cmd.option);
+		return (-1);	
+	}
+	if (ind != 4)
+		expander(c, env);
+	return (0);
+}
+
+int	command_lexer(t_cmd **cmd, t_env *env)
+{
+	t_cmd *c;
+	int		i;
+	int		ind;
+
+	i = 0;
+	c = *cmd;
+	while (cmd[i].cmd)
+	{
+		ind = own_check(cmd[i].cmd);
+		if (ind > 0)
+			if (own_lexer(&cmd[i], ind, env) == -1)
+				return (-1);
+		else
+			expander(&cmd[i], env);
+		i++;
+	}
+	return (0);
+}
+
+t_cmd	*parser(char *input, t_env *env)
 {
 	t_cmd	*cmd;
 	int			cmd_count;
+	int			unclosed;
 
-	if (unclosed_quotes(input) != -1)
+	unclosed = unclosed_quotes(input);
+	if (unclosed != -1)
 		return (NULL);
 	cmd_count = command_counter(input);
 	cmd = malloc(sizeof(t_cmd) * (cmd_count + 1));
 	command_parser(input, &cmd, cmd_count);
+	command_lexer(&cmd, env);
 	return (cmd);
 }
 

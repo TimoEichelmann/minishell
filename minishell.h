@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:44 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/10 13:36:03 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/15 17:16:19 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,19 +44,32 @@ typedef struct s_env {
 }	t_env;
 
 
-// char	**ft_split(char const *s, char c);
-// char	*ft_strjoin(char const *s1, char const *s2);
-// size_t	ft_strlcpy(char *dst, const char *src, size_t size);
-// int	ft_strncmp(const char *s1, const char *s2, size_t n);
 char *maintain_cd(char *input, char *promt) ;
-// int	ft_strlen(const char *s);
-// void    change_env(t_list *env, char *input/* , t_shell *shell */);
-// void    remove_env(char **env, char *input);
 void	ft_env(t_list *env);
 void	del_env(t_list *env);
 char	*ft_getenv(t_list *env, char *name);
 t_list	*init_env(char **ev);
 void	echo(char *input, t_list *env);
 int	substr_len(char *substr);
-// char	*ft_substr(const char *s, unsigned int start, unsigned int len);
+void	free_cmd(t_cmd *cmd);
+void	ft_exit(t_list *env);
+char	*cmd_read(char *input, int *j);
+int	space_check(char *input, int ind);
+int	is_token(char *c);
+char	*arg_read(char *input, int *j);
+char	*token_read(char *input, int *j);
+t_cmd	*parser(char *input, t_list *env);
+int	unclosed_quotes(char *input);
+int	iterate_quotes(char *input, int ind, int i);
+void	command_parser(char	*input, t_cmd **cmd, int cmd_count);
+int	command_counter(char *input);
+int	command_lexer(t_cmd *cmd, t_list *env);
+int	own_lexer(t_cmd *c, int ind, t_list *env);
+void	expander(t_cmd *cmd, t_list *env);
+char	*exchange(char *arg, int index, t_list *env);
+void	env_lexer(t_cmd cmd);
+int	own_check(char *cmd);
+
+char	*opt_read(char *input, int *j);
+void	execution(t_shell *shell, char **ev);
 #endif

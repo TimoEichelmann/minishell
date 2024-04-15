@@ -6,7 +6,7 @@
 #    By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/23 14:33:21 by snegi             #+#    #+#              #
-#    Updated: 2024/04/04 12:55:37 by teichelm         ###   ########.fr        #
+#    Updated: 2024/04/15 17:12:33 by teichelm         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,7 @@ LDFLAG		=	-lreadline -lhistory
 
 HEADER	 	=	minshell.h
 
-SRCS		=	minishell.c minishell_utl.c
+SRCS		=	minishell.c minishell_utl.c parser.c parser_helpers.c lexer.c env.c
 
 LIBFT		=	libft.a
 
