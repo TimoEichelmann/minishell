@@ -6,11 +6,19 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:25:03 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/15 17:38:07 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/19 16:27:47 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+void	env_lexer(t_cmd cmd)
+{
+	if (cmd.option)
+		printf("env: '%s': No such file or directory", cmd.option);
+	if (cmd.arg)
+		printf("env: '%s': No such file or directory", cmd.arg);
+}
 
 int	own_check(char *cmd)
 {
@@ -34,12 +42,30 @@ int	own_check(char *cmd)
 
 }
 
-void	env_lexer(t_cmd cmd)
+char	*paste_var(int index, char *arg, char *var, t_list *env)
 {
-	if (cmd.option)
-		printf("env: '%s': No such file or directory", cmd.option);
-	if (cmd.arg)
-		printf("env: '%s': No such file or directory", cmd.arg);
+	char 	*result;
+	int		i;
+	
+	i = 0;
+	result = malloc(sizeof(char) * (ft_strlen(arg) - ft_strlen(var)
+			+ ft_strlen(ft_getenv(env, var))));
+	while(i < index)
+	{
+		result[i] = arg[i];
+		i++;
+	}
+	index += ft_strlcpy(result + i, ft_getenv(env, var),
+				ft_strlen(ft_getenv(env, var)) + 1);
+	i += ft_strlen(var) + 1;
+	while(arg[i])
+	{
+		result[index] = arg[i];
+		index++;
+		i++;
+	}
+	result[index] = 0;
+	return (result);
 }
 
 char	*exchange(char *arg, int index, t_list *env)
@@ -50,22 +76,14 @@ char	*exchange(char *arg, int index, t_list *env)
 
 	i = 0;
 	var = ft_substr(arg, index + 1, substr_len(arg + index + 1));
-	result = malloc(sizeof(char) * (ft_strlen(arg) - ft_strlen(var)
-				+ ft_strlen(ft_getenv(env, var))));
-	while(i < index)
+	if (!ft_getenv(env, var))
 	{
-		result[i] = arg[i];
-		i++;
+		free(var);
+		free(arg);
+		return (NULL);
 	}
-	index += ft_strlcpy(result, ft_getenv(env, var), ft_strlen(ft_getenv(env, var))) - 1;
-	i += ft_strlen(var) + 1;
-	while(arg[i])
-	{
-		result[index] = arg[i];
-		index++;
-		i++;
-	}
-	result[index] = 0;
+	result = paste_var(index, arg, var, env);
+	free(var);
 	free(arg);
 	return (result);
 }
@@ -77,15 +95,17 @@ void	expander(t_cmd *cmd, t_list *env)
 	char	*arg;
 
 	i = 0;
-	arg = cmd->arg;
 	quote_count = 0;
-	while (arg[i] != '\0')
+	while (cmd->arg && cmd->arg[i] != '\0')
 	{
-		if (arg[i] == 39)
+		if (cmd->arg[i] == 39)
 			quote_count++;
-		if (arg[i] == '$' && quote_count % 2 != 1 && arg[i + 1]
-			&& ft_isprint(arg[i + 1]) == 1)
-			arg = exchange(arg, i, env);
+		if (cmd->arg[i] == '$' && quote_count % 2 != 1 && cmd->arg[i + 1]
+			&& ft_isprint(cmd->arg[i + 1]) == 1 && cmd->arg[i + 1] != '?')
+		{
+			arg = cmd->arg;
+			cmd->arg = exchange(arg, i, env);
+		}
 		i++;
 	}
 }
@@ -117,6 +137,70 @@ int	own_lexer(t_cmd *cmd, int ind, t_list *env)
 	return (0);
 }
 
+// int right_input(char *input)
+// {
+//     int single;
+//     int doub;
+//     single = 0;
+//     doub = 0;
+//     while(*input  && *input != '\0')
+//     {
+//         if (*input == 34)
+//             doub++;
+//         else if(*input == 39)
+//             single++;
+//         input++;
+//     }
+//     if (doub % 2 == 0 && single % 2 == 0)
+//         return (1);
+//     else
+//         return (0);
+// }
+
+char	*delete_quotation(char *input)
+{
+	int		i;
+	char	*result;
+	int		j;
+	int		count;
+
+	i = 0;
+	j = 0;
+	count = 0;
+	while (input[i])
+	{
+		if (input[i] == 34 || input[i] == 39)
+			count++;
+		i++;
+	}
+	result = malloc(sizeof(char) * (ft_strlen(input) - count + 1));
+	i = 0;
+	while (input[i + j])
+	{
+		while (input[i + j] && (input[i + j] == 34 || input[i + j] == 39))
+			j++;
+		result[i] = input[i + j];
+		if (input[i + j])
+			i++;
+	}
+	result[i] = 0;
+	free(input);
+	return (result);
+}
+
+int	remove_quotation(t_cmd *cmd)
+{
+	if (unclosed_quotes(cmd->cmd) != -1)
+		return (-1);
+	if (cmd->input)
+		cmd->input = delete_quotation(cmd->input);
+	if (cmd->cmd)
+		cmd->cmd = delete_quotation(cmd->cmd);
+	if (cmd->arg)		
+		cmd->arg = delete_quotation(cmd->arg);
+	return (0);
+}
+
 int	command_lexer(t_cmd *c, t_list *env)
 {
 	int		i;
@@ -133,6 +217,8 @@ int	command_lexer(t_cmd *c, t_list *env)
 		}
 		else
 			expander(&c[i], env);
+		if (remove_quotation(&c[i]) == -1)
+			return (-1);
 		i++;
 	}
 	return (0);

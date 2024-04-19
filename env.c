@@ -6,28 +6,18 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:18:06 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/15 16:41:55 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/19 17:21:37 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-t_list	*init_env(char **ev)
+char	**init_env(char **ev)
 {
-	int	i;
-	t_list	*env;
-	t_list	*head;
+	char	**env;
 
-	i = 0;
-	head = NULL;
-	while (ev[i])
-	{
-		env = malloc(sizeof(t_list));
-		env->c = ft_strdup(ev[i]);
-		ft_lstadd_back(&head, env);
-		i++;
-	}
-	return (head);
+	env = copy_environment(env, 1);
+	return (env);
 }
 
 int	substr_len(char *substr)
@@ -41,47 +31,49 @@ int	substr_len(char *substr)
 	return (i);
 }
 
-char	*ft_getenv(t_list *env, char *name)
+char	*ft_getenv(char **env, char *name)
 {
 	int		i;
 	char	*c;
 	int		ind; 
+	int		j;
 
+	j = 0;
 	i = 0;
 	ind = 0;
-	while (name[i] == ' ')
-		name++;
-	while (env && ind == 0)
+	while (env[i] && ind == 0)
 	{
-		c = (char *)env->c;
-		if (ft_strncmp(c, name + i, ft_strlen(name)) == 0)
+		if (ft_strncmp(env[i], name, ft_strlen(name)) == 0)
 			ind = 1;
 		else
-			env = env->next;
+			i++;
 	}
-	if (!env)
+	if (!env[i])
 		return (NULL);
-	i = 0;
-	while (c[i] != '=')
-		i++;
-	return (c + i + 1);
-	//must not be modified!!!!
+	while (env[i][j] != '=')
+		j++;
+	return (env[i] + j + 1);
 }
 
-void	del_env(t_list *env)
+void	del_env(char **env)
 {
-	while (env)
+	int	i;
+
+	i = 0;
+	while (env[i])
 	{
-		free(env->c);
-		env = env->next;
+		free(env[i]);
+		i++;
 	}
 	free(env);
 }
 
-void	ft_env(t_list *env)
+void	ft_env(char **env)
 {
-	char *c;
+	char 	*c;
+	int		i;
 
+	i = 0;
 	while (env)
 	{
 		c = env->c;

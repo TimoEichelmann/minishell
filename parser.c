@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:22:53 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/15 17:31:03 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/19 14:18:01 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ t_cmd	*parser(char *input, t_list *env)
 	t_cmd	*cmd;
 	int			cmd_count;
 	int			unclosed;
+	int			status;
 
 	unclosed = unclosed_quotes(input);
 	if (unclosed != -1)
@@ -73,9 +74,15 @@ t_cmd	*parser(char *input, t_list *env)
 	cmd_count = command_counter(input);
 	cmd = malloc(sizeof(t_cmd) * (cmd_count + 1));
 	command_parser(input, &cmd, cmd_count);
-	command_lexer(cmd, env);
+	status = command_lexer(cmd, env);
+	if (status == -1)
+	{
+		free_cmd(cmd);
+		return (NULL);
+	}
 	return (cmd);
 }
+
 
 void	command_parser(char	*input, t_cmd **cmd, int cmd_count)
 {
@@ -88,6 +95,7 @@ void	command_parser(char	*input, t_cmd **cmd, int cmd_count)
 	c = *cmd;
 	while (i < cmd_count)
 	{
+		c[i].input = input_read(input, &j);
 		c[i].cmd = cmd_read(input, &j);
 		c[i].option = opt_read(input, &j);
 		c[i].arg = arg_read(input, &j);
@@ -102,20 +110,24 @@ int	command_counter(char *input)
 {
 	int	i;
 	int	command_count;
-
+	int	quotation_count;
+	
 	command_count = 1;
 	i = 0;
+	quotation_count = 0;
 	while (input[i])
 	{
+		if (input[i] == 34 || input[i] == 39)
+			quotation_count++;
 		if ((input[i] == '<' || input[i] == '>' || input[i] == '|')
-				&& space_check(input + i, 0) == 0 && input[i + 1])
+				&& quotation_count % 2 != 1 && input[i + 1])
 		{
 			command_count++;
 		}
 		if ((input[i] == '<' && input[i + 1] == '<' && input[i + 2] &&
-				space_check(input + i, 1) == 0) || (input[i] == '>' &&
+				quotation_count % 2 != 1) || (input[i] == '>' &&
 					input[i + 2] && input[i + 1] == '>' &&
-						space_check(input + i, 1) == 0))
+						quotation_count % 2 != 1))
 		{
 			command_count++;
 			i++;

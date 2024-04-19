@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:17 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/15 17:37:16 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/19 16:39:45 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,28 +58,27 @@ static char	*get_command(char **path, char *command)
 	return (NULL);
 }
 
-void	execution(t_shell *shell, char **ev)
-{
-	int	pid;
+// void	execution(t_shell *shell, char **ev)
+// {
+// 	int	pid;
 
-	pid = fork();
-	if (pid == 0)
-	{
-        shell->command = get_command(shell->command_path, shell->command_arg[0]);
-        if(shell->command == NULL)
-            printf("No Such Command.\n");
-        else if (execve(shell->command, shell->command_arg, ev) == -1)
-                perror("execv failed.");
-        free(shell->command);
-        free_memory(shell);
-        exit(1);
-	}
-	else
-		wait(0);
-}
+// 	pid = fork();
+// 	if (pid == 0)
+// 	{
+//         shell->command = get_command(shell->command_path, shell->command_arg[0]);
+//         if(shell->command == NULL)
+//             printf("No Such Command.\n");
+//         else if (execve(shell->command, shell->command_arg, ev) == -1)
+//                 perror("execv failed.");
+//         free(shell->command);
+//         free_memory(shell);
+//         exit(1);
+// 	}
+// 	else
+// 		wait(0);
+// }
 
 
-// change value if variable already exists
 
 
 void	ft_exit(t_list *env)
@@ -89,48 +88,17 @@ void	ft_exit(t_list *env)
 	return ;
 }
 
-// int right_input(char *input)
-// {
-//     int single;
-//     int doub;
-
-//     single = 0;
-//     doub = 0;
-//     while(*input  && *input != '\0')
-//     {
-//         if (*input == 34)
-//             doub++;
-//         else if(*input == 39)
-//             single++;
-//         input++;
-//     }
-//     if (doub % 2 == 0 && single % 2 == 0)
-//         return (1);
-//     else
-//         return (0);
-// }
-
-// int	check_input(char *input)
-// {
-		
-// }
-
-
-
-//remove spaces at end
-
-
-
-
 void	free_cmd(t_cmd *cmd)
 {
 	int	i;
 
 	i = 0;
-	while (cmd[i].cmd)
-		i++;
+	if (!cmd)
+		return ;
 	while (cmd[i].cmd)
 	{
+		if (cmd[i].input)
+			free(cmd[i].input);
 		if (cmd[i].cmd)
 			free(cmd[i].cmd);
 		if (cmd[i].option)
@@ -139,9 +107,91 @@ void	free_cmd(t_cmd *cmd)
 			free(cmd[i].arg);
 		if (cmd[i].token)
 			free(cmd[i].token);
-		i--;
+		i++;
 	}
 	free(cmd);
+}
+
+int	count_pipes(t_cmd *cmd)
+{
+	int	i;
+	int	result;
+
+	result = 0;
+	i = 0;
+	while (cmd[i].cmd)
+	{
+		if (cmd[i].token && ft_strncmp(cmd[i].token, "|", 1) == 0)
+		{
+			printf("hello");
+			result++;		
+		}
+		i++;
+	}
+	return (result);
+}
+
+void execution(t_shell *shell, char **ev, int i, int fd[][2], int no) {
+    if (i > 0)
+        dup2(fd[i - 1][0], 0);
+    if (i < no)
+        dup2(fd[i][1], 1);
+    
+    for (int j = 0; j < no; j++) {
+        if (i == j)
+            close(fd[i][0]);
+        else if (i ==  j + 1)
+            close(fd[j][1]);
+
+        if (i != j && i != j + 1)
+        {
+            close(fd[j][0]);
+            close(fd[j][1]);
+        }
+    }
+
+    shell->command = get_command(shell->command_path, shell->command_arg[0]);
+	// check for own functions
+    if (shell->command == NULL)
+        printf("No Such Command.\n");
+    else if (execve(shell->command, shell->command_arg, ev) == -1)
+        perror("execve failed.");
+    free(shell->command);
+}
+
+int	main_exec(int no, char **ev, char **av/* t_cmd *cmd */, t_list *env)
+{
+    t_shell shell;
+    int fd[no][2];
+    int pid[no + 3];
+    int i;
+
+    for(i = 0; i< no ; i++)
+    {
+        if(pipe(fd[i]) < 0)
+            return -1;
+    }
+    for (i = 0; i <= no; i++)
+    {
+        pid[i] = fork();
+        if(pid[i] < 0)
+            return -2;
+         if (pid[i] == 0)
+         { 
+            shell.command_arg = ft_split(av[i + 1], ' ');
+            shell.path = ft_getenv(env, "PATH");
+            shell.command_path = ft_split(shell.path, ':');
+            execution(&shell, ev, i, fd, no);
+         }
+    }
+    for (i = 0; i < no; i++)
+	{
+        close(fd[i][0]);
+        close(fd[i][1]);
+    }
+    for (i = 0; i<= no; i++)
+        waitpid(pid[i], NULL, 0);
+    return 0;
 }
 
 int main(int ac, char **av, char **ev)
@@ -149,8 +199,9 @@ int main(int ac, char **av, char **ev)
     // t_shell shell;
     char *input;
     char *promt;
-	t_list	*env;
+	char	**env;
 	t_cmd	*cmd;
+	// int		pipe_num;
 
 	env = NULL;
     if(ac == 1 && !av[1])
@@ -162,23 +213,30 @@ int main(int ac, char **av, char **ev)
         while (1)
         {
             input = readline(promt);
+			if (!input || ft_strncmp(input, "exit", 5) == 0)
+			{
+				ft_exit(env);
+				exit(5);
+			}
             add_history(input);
 			cmd = parser(input, env);
-			// if (!input || ft_strncmp(input, "exit", 5) == 0)
-			// {
-			// 	ft_exit(env);
-			// 	exit(5);
-			// }
 			int i = 0;
-			while(cmd[i].cmd)
+			if (cmd)
 			{
-				printf("main cmd: '%s' opt: '%s' arg: '%s' tok: '%s'\n", cmd->cmd, cmd->option, cmd->arg, cmd->token);
+			while (cmd[i].cmd)
+			{
+				printf("input :%s cmd :%s opt :%s arg :%s tok :%s\n", cmd[i].input, cmd[i].cmd, cmd[i].option, cmd[i].arg, cmd[i].token);
 				i++;
 			}
-			
+			}
+			// pipe_num = count_pipes(cmd);
+			// if (pipe_num <= 1)
+			// 	single_exec(cmd, env)
+			// else
+			// 	main_exec(pipe_num, ev, av, env);
 			free_cmd(cmd);
 		}
-    del_env(env);
+    	del_env(env);
 	}
     return 0;
 }

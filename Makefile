@@ -6,15 +6,13 @@
 #    By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/23 14:33:21 by snegi             #+#    #+#              #
-#    Updated: 2024/04/15 17:12:33 by teichelm         ###   ########.fr        #
+#    Updated: 2024/04/19 16:41:39 by teichelm         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME		=	minishell
 
 CC			=	cc
-
-CFLAGS		=	-Wall -Wextra -Werror -I. -g
 
 LDFLAG		=	-lreadline -lhistory
 
@@ -34,7 +32,7 @@ all:			$(NAME)
 # OBJF		=	$(FUNC:.c=.o)
 
 %.o: %.c $(HEADER) Makefile
-								$(CC) $(CFLAGS) -c -o $@ $<
+								$(CC) -Wall -Wextra -Werror -I. -g -c -o $@ $<
 
 $(LIBFT):
 		cd ./libft && make

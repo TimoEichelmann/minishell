@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:44 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/15 17:16:19 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/19 15:16:08 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ typedef	struct s_cmd {
 	char	*cmd;
 	char	*option;
 	char	*arg;
+	char	*input;
 	char	*token;
 }	t_cmd;
 
@@ -54,7 +55,6 @@ int	substr_len(char *substr);
 void	free_cmd(t_cmd *cmd);
 void	ft_exit(t_list *env);
 char	*cmd_read(char *input, int *j);
-int	space_check(char *input, int ind);
 int	is_token(char *c);
 char	*arg_read(char *input, int *j);
 char	*token_read(char *input, int *j);
@@ -69,7 +69,7 @@ void	expander(t_cmd *cmd, t_list *env);
 char	*exchange(char *arg, int index, t_list *env);
 void	env_lexer(t_cmd cmd);
 int	own_check(char *cmd);
-
+char	*input_read(char *input, int *j);
+char	*delete_quotation(char *input);
 char	*opt_read(char *input, int *j);
-void	execution(t_shell *shell, char **ev);
 #endif
