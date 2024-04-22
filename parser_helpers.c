@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:24:40 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/19 16:21:20 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/22 17:34:22 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,20 +31,13 @@ char	*cmd_read(char *input, int *j)
 
 char	*opt_read(char *input, int *j)
 {
-	int		i;
-	char	*result;
+	int	ind;
+	int	i;
 
+	ind = 0;
 	i = 0;
-	while (input[*j] && (input[*j] == ' ' || input[*j] == '	'))
-		*j += 1;
-	if (input[*j] == '-' || ((input[*j] == 34 || input[*j] == 39)
-			&& input[*j + 1] == '-'))
-	{
-		while (ft_isprint(input[*j + i]) != 1 || input[*j + i] == '	' || input[*j + i] == ' ')
-			i++;
-		if (input[*j] == '-')
-	}
-	return (NULL);
+	while ()
+	
 }
 
 // int	space_check(char *input, int ind)

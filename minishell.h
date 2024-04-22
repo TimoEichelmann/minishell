@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:44 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/19 15:16:08 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/22 17:40:38 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,36 +37,34 @@ typedef	struct s_cmd {
 	char	*option;
 	char	*arg;
 	char	*input;
+	char	*redirection;
 	char	*token;
 }	t_cmd;
 
-typedef struct s_env {
-	char	*var;
-}	t_env;
-
 
 char *maintain_cd(char *input, char *promt) ;
-void	ft_env(t_list *env);
-void	del_env(t_list *env);
-char	*ft_getenv(t_list *env, char *name);
-t_list	*init_env(char **ev);
-void	echo(char *input, t_list *env);
+int	ft_env(char **env);
+void	del_env(char **env);
+char	*ft_getenv(char **env, char *name);
+char	**init_env(char **ev);
+void	echo(char *input, char **env);
 int	substr_len(char *substr);
 void	free_cmd(t_cmd *cmd);
-void	ft_exit(t_list *env);
+void	ft_exit(char **env);
 char	*cmd_read(char *input, int *j);
 int	is_token(char *c);
 char	*arg_read(char *input, int *j);
 char	*token_read(char *input, int *j);
-t_cmd	*parser(char *input, t_list *env);
+t_cmd	*parser(char *input, char **env);
 int	unclosed_quotes(char *input);
 int	iterate_quotes(char *input, int ind, int i);
+char	**copy_environment(char **old, int ind);
 void	command_parser(char	*input, t_cmd **cmd, int cmd_count);
 int	command_counter(char *input);
-int	command_lexer(t_cmd *cmd, t_list *env);
-int	own_lexer(t_cmd *c, int ind, t_list *env);
-void	expander(t_cmd *cmd, t_list *env);
-char	*exchange(char *arg, int index, t_list *env);
+int	command_lexer(t_cmd *cmd, char **env);
+int	own_lexer(t_cmd *c, int ind, char **env);
+void	expander(t_cmd *cmd, char **env);
+char	*exchange(char *arg, int index, char **env);
 void	env_lexer(t_cmd cmd);
 int	own_check(char *cmd);
 char	*input_read(char *input, int *j);

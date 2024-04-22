@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:18:06 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/19 17:21:37 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/22 17:26:13 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ char	**init_env(char **ev)
 {
 	char	**env;
 
-	env = copy_environment(env, 1);
+	env = copy_environment(ev, 1);
 	return (env);
 }
 
@@ -34,7 +34,6 @@ int	substr_len(char *substr)
 char	*ft_getenv(char **env, char *name)
 {
 	int		i;
-	char	*c;
 	int		ind; 
 	int		j;
 
@@ -68,16 +67,17 @@ void	del_env(char **env)
 	free(env);
 }
 
-void	ft_env(char **env)
+int	ft_env(char **env)
 {
-	char 	*c;
 	int		i;
 
 	i = 0;
-	while (env)
+	while (env[i])
 	{
-		c = env->c;
-		printf("%s\n", c);
-		env = env->next;
+		printf("%s\n", env[i]);
+		i++;
 	}
+	return (0);
 }
+
+
