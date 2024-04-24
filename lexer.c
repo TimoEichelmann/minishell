@@ -6,18 +6,38 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:25:03 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/19 16:27:47 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/24 16:00:00 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	env_lexer(t_cmd cmd)
+int	env_lexer(t_cmd cmd)
 {
 	if (cmd.option)
-		printf("env: '%s': No such file or directory", cmd.option);
+	{
+		printf("env: '%s': No such file or directory\n", cmd.option);
+		return (-1);
+	}
 	if (cmd.arg)
-		printf("env: '%s': No such file or directory", cmd.arg);
+	{
+		printf("env: '%s': No such file or directory\n", cmd.arg);
+		return (-1);
+	}
+	return (0);
+}
+
+int	export_lexer(char *arg)
+{
+	int	i;
+
+	i = 0;
+	while (arg[i] != '=')
+		i++;
+	if (arg[i + 1] == ' ' || arg[i + 1] == '	'
+		|| arg[i - 1] == ' ' || arg[i - 1] == '	')
+		return (1);
+	return (0);
 }
 
 int	own_check(char *cmd)
@@ -42,7 +62,7 @@ int	own_check(char *cmd)
 
 }
 
-char	*paste_var(int index, char *arg, char *var, t_list *env)
+char	*paste_var(int index, char *arg, char *var, char **env)
 {
 	char 	*result;
 	int		i;
@@ -68,7 +88,7 @@ char	*paste_var(int index, char *arg, char *var, t_list *env)
 	return (result);
 }
 
-char	*exchange(char *arg, int index, t_list *env)
+char	*exchange(char *arg, int index, char **env)
 {
 	char	*var;
 	char	*result;
@@ -88,7 +108,46 @@ char	*exchange(char *arg, int index, t_list *env)
 	return (result);
 }
 
-void	expander(t_cmd *cmd, t_list *env)
+void	ft_paste(char *result, char *str, char *num)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	j = 0;
+	while (str[i] && (str[i] != '$' && str[i + 1] != '?'))
+	{
+		result[i] = str[i];
+		i++;
+	}
+	while (num[j])
+	{
+		result[i + j] = num[j];
+		j++;	
+	}
+	i += j;
+	while (str[i - j + 2])
+	{
+		result[i] = str[i - j + 2];
+		i++;
+	}
+	result[i] = 0;
+}
+
+char *paste_ex_status(char *str, int ex_status)
+{
+	char	*result;
+	char	*num;
+	
+	num = ft_itoa(ex_status);
+	result = malloc(sizeof(char) * (ft_strlen(str) - 1 + ft_strlen(num)));
+	ft_paste(result, str, num);
+	free(str);
+	free(num);
+	return (result);
+}
+
+char	*expander(char *str, char **env, int ex_status)
 {
 	int		i;
 	int		quote_count;
@@ -96,66 +155,57 @@ void	expander(t_cmd *cmd, t_list *env)
 
 	i = 0;
 	quote_count = 0;
-	while (cmd->arg && cmd->arg[i] != '\0')
+	while (str && str[i] != '\0')
 	{
-		if (cmd->arg[i] == 39)
+		if (str[i] == 39)
 			quote_count++;
-		if (cmd->arg[i] == '$' && quote_count % 2 != 1 && cmd->arg[i + 1]
-			&& ft_isprint(cmd->arg[i + 1]) == 1 && cmd->arg[i + 1] != '?')
+		if (str[i] == '$' && str[i + 1] == '?')
+			str = paste_ex_status(str, ex_status);
+		if (str[i] == '$' && quote_count % 2 != 1 && str[i + 1]
+			&& ft_isprint(str[i + 1]) == 1 && str[i + 1] != '?')
 		{
-			arg = cmd->arg;
-			cmd->arg = exchange(arg, i, env);
+			arg = str;
+			str = exchange(arg, i, env);
 		}
 		i++;
 	}
+	return (str);
 }
 
-int	own_lexer(t_cmd *cmd, int ind, t_list *env)
+int	print_lexerror(char *function, char *error)
 {
-	if (ind == 1 && (cmd->option || cmd->arg))
-	{
-		env_lexer(*cmd);
+	if (error)
+		printf("%s: bad option: %s\n", function, error);
+	else
+		printf("%s: bad argument\n", function);
+	return (-1);
+}
+
+int	own_lexer(t_cmd *cmd, int ind, char **env, int ex_status)
+{
+	if (ind == 1 && (cmd->option || cmd->arg) && env_lexer(*cmd) == -1)
 		return (-1);
-	}
-	if (ind == 2 && cmd->option)
+	if (ind == 2 && (!cmd->arg || cmd->arg[0] == '-'))
+		return (print_lexerror(cmd->cmd, NULL));
+	if (ind == 4)
 	{
-		printf("unset: bad option: %s", cmd->option);
-		return (-1);
-	}
-	if (ind == 4 && cmd->option)
-	{
-		printf("export: bad option: %s", cmd->option);
-		return (-1);
+		if (cmd->option)
+			return (print_lexerror(cmd->cmd, cmd->option));
+		if (!cmd->arg || export_lexer(cmd->arg) == 1)
+		{
+			printf("export: wrong variable declaration\n");
+			return (-1);
+		}
 	}
 	if (ind == 5 && cmd->option && ft_strncmp(cmd->option, "-n", 2) != 0)
+		return (print_lexerror(cmd->cmd, cmd->option));
+	if (ind != 4)
 	{
-		printf("echo: bad option: %s", cmd->option);
-		return (-1);	
+		cmd->arg = expander(cmd->arg, env, ex_status);
+		cmd->input = expander(cmd->input, env, ex_status);
 	}
-	if (ind != 4 && (ind != 5 && !cmd->arg))
-		expander(cmd, env);
 	return (0);
 }
-
-// int right_input(char *input)
-// {
-//     int single;
-//     int doub;
-//     single = 0;
-//     doub = 0;
-//     while(*input  && *input != '\0')
-//     {
-//         if (*input == 34)
-//             doub++;
-//         else if(*input == 39)
-//             single++;
-//         input++;
-//     }
-//     if (doub % 2 == 0 && single % 2 == 0)
-//         return (1);
-//     else
-//         return (0);
-// }
 
 char	*delete_quotation(char *input)
 {
@@ -201,7 +251,7 @@ int	remove_quotation(t_cmd *cmd)
 	return (0);
 }
 
-int	command_lexer(t_cmd *c, t_list *env)
+int	command_lexer(t_cmd *c, char **env, int ex_status)
 {
 	int		i;
 	int		ind;
@@ -212,11 +262,11 @@ int	command_lexer(t_cmd *c, t_list *env)
 		ind = own_check(c[i].cmd);
 		if (ind > 0)
 		{
-			if (own_lexer(&c[i], ind, env) == -1)
+			if (own_lexer(&c[i], ind, env, ex_status) == -1)
 				return (-1);
 		}
 		else
-			expander(&c[i], env);
+			c[i].input = expander(c[i].input, env, ex_status);
 		if (remove_quotation(&c[i]) == -1)
 			return (-1);
 		i++;

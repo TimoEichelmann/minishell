@@ -6,29 +6,13 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 11:31:43 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/19 16:51:10 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/24 11:42:16 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-char    *current_pwd()
-{
-        char *folder;
-        int i;
-
-        folder = getcwd(NULL, 0);
-        i = ft_strlen(folder);
-        while(folder[i-1] != '/')
-            i--;
-        if (ft_strncmp(folder + i, "minishell",9) == 0)
-            folder = ">$ ";
-        else
-            folder = ft_strjoin(folder + i, ">$ ");
-    return(folder);
-}
-
-int count_folder()
+int count_folder(void)
 {
     char *folder;
     int count;
@@ -48,9 +32,26 @@ int count_folder()
     return (count);
 }
 
-char *maintain_cd(char *input, char *promt) 
+void	change_pwd(char **env)
 {
-    char *folder;
+	char *pwd;
+	char *old_pwd;
+	char *temp;
+
+	pwd = getcwd(NULL, 0);
+	old_pwd = ft_getenv(env, "PWD");
+	temp = pwd;
+	pwd = ft_strjoin("PWD=", pwd);
+	old_pwd = ft_strjoin("OLDPWD=", old_pwd);
+	free(temp);
+	ft_export(&env, pwd);
+	ft_export(&env, old_pwd);
+	free(pwd);
+	free(old_pwd);
+}
+
+int	maintain_cd(char *input, char **env) 
+{
     int count;
 
     while (*input != '\0' && *input == ' ')
@@ -60,17 +61,13 @@ char *maintain_cd(char *input, char *promt)
         count = count_folder();
         while(count--)
             chdir("..");
-        folder = ">$ ";
-        return (folder);
-    }
-    if (input[0] == '.' && ft_strncmp(current_pwd(), ">$ ", 3) == 0)
-        return (promt);   
+        return (0);
+    } 
     if (chdir(input) != 0)
     {
         perror("chdir");
-        return (promt);
+        return (1);
     }
-    folder = current_pwd();
-    return (folder);
+	change_pwd(env);
+    return (0);
 }
-

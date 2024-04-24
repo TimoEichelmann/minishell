@@ -6,7 +6,7 @@
 #    By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/23 14:33:21 by snegi             #+#    #+#              #
-#    Updated: 2024/04/19 16:41:39 by teichelm         ###   ########.fr        #
+#    Updated: 2024/04/23 13:02:09 by teichelm         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,12 +14,13 @@ NAME		=	minishell
 
 CC			=	cc
 
+CFLAGS		=	-Wall -Wextra -Werror -I. -g
+
 LDFLAG		=	-lreadline -lhistory
 
 HEADER	 	=	minshell.h
 
-SRCS		=	minishell.c minishell_utl.c parser.c parser_helpers.c lexer.c env.c
-
+SRCS		=	minishell.c minishell_utl.c parser.c parser_helpers.c lexer.c env.c multi_pipe.c export.c echo.c redirection.c
 LIBFT		=	libft.a
 
 OBJS		=	$(SRCS:.c=.o)
@@ -32,7 +33,7 @@ all:			$(NAME)
 # OBJF		=	$(FUNC:.c=.o)
 
 %.o: %.c $(HEADER) Makefile
-								$(CC) -Wall -Wextra -Werror -I. -g -c -o $@ $<
+								$(CC) $(CFLAGS) -c -o $@ $<
 
 $(LIBFT):
 		cd ./libft && make

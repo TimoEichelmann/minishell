@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:22:53 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/19 14:18:01 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/24 16:17:22 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ int	unclosed_quotes(char *input)
 	return (0);
 }
 
-t_cmd	*parser(char *input, t_list *env)
+t_cmd	*parser(char *input, char **env, int ex_status)
 {
 	t_cmd	*cmd;
 	int			cmd_count;
@@ -72,9 +72,11 @@ t_cmd	*parser(char *input, t_list *env)
 	if (unclosed != -1)
 		return (NULL);
 	cmd_count = command_counter(input);
+	if (!cmd_count)
+		return (NULL);
 	cmd = malloc(sizeof(t_cmd) * (cmd_count + 1));
 	command_parser(input, &cmd, cmd_count);
-	status = command_lexer(cmd, env);
+	status = command_lexer(cmd, env, ex_status);
 	if (status == -1)
 	{
 		free_cmd(cmd);
@@ -83,23 +85,35 @@ t_cmd	*parser(char *input, t_list *env)
 	return (cmd);
 }
 
+int	readers(t_cmd *cmd, int ind)
+{
+	
+	c->input = input_read(input, &j);
+	if (!c->input)
+		return ;
+	c[i]->cmd = cmd_read(input, &j);
+	if (ft_strncmp(c[i]->cmd, "echo", 5) == 0)
+		ind = 1;
+	c[i]->option = opt_read(input, &j, ind);
+	ind = 0;
+	c[i]->arg = arg_read(input, &j);
+	c[i]->token = token_read(input, &j, &c[i]->file);
+}
 
 void	command_parser(char	*input, t_cmd **cmd, int cmd_count)
 {
-	t_cmd	*c;
 	int			i;
 	int			j;
+	int			ind;
+	t_cmd		*c;
 
 	j = 0;
 	i  = 0;
-	c = *cmd;
+	ind = 0;
+	c = *c;
 	while (i < cmd_count)
 	{
-		c[i].input = input_read(input, &j);
-		c[i].cmd = cmd_read(input, &j);
-		c[i].option = opt_read(input, &j);
-		c[i].arg = arg_read(input, &j);
-		c[i].token = token_read(input, &j);
+		readers(&c[i], ind)
 		i++;
 	}
 	c[i].cmd = NULL;
@@ -114,23 +128,18 @@ int	command_counter(char *input)
 	
 	command_count = 1;
 	i = 0;
+	while (input[i] && ft_isalnum(input[i]) == 0)
+		i++;
+	if (!input[i])
+		return (0);
 	quotation_count = 0;
 	while (input[i])
 	{
 		if (input[i] == 34 || input[i] == 39)
 			quotation_count++;
-		if ((input[i] == '<' || input[i] == '>' || input[i] == '|')
-				&& quotation_count % 2 != 1 && input[i + 1])
+		if (input[i] == '|' && quotation_count % 2 != 1 && input[i + 1])
 		{
 			command_count++;
-		}
-		if ((input[i] == '<' && input[i + 1] == '<' && input[i + 2] &&
-				quotation_count % 2 != 1) || (input[i] == '>' &&
-					input[i + 2] && input[i + 1] == '>' &&
-						quotation_count % 2 != 1))
-		{
-			command_count++;
-			i++;
 		}
 		i++;
 	}

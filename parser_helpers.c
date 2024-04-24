@@ -6,11 +6,14 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:24:40 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/22 17:34:22 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/24 13:47:04 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+//tokens passed withput space
+//filenames for >> <<
 
 char	*cmd_read(char *input, int *j)
 {
@@ -29,39 +32,28 @@ char	*cmd_read(char *input, int *j)
 	return (result);
 }
 
-char	*opt_read(char *input, int *j)
+char	*opt_read(char *input, int *j, int ind)
 {
-	int	ind;
-	int	i;
+	int		i;
 
-	ind = 0;
 	i = 0;
-	while ()
-	
+	if (ind == 0)
+		return (NULL);
+	while (input[*j] == '	' || input[*j] == ' ')
+		*j += 1;
+	if (!input[*j])
+		return (NULL);
+	if (ft_strncmp(input + *j, "-n", 2) == 0 ||
+			(input[*j] == 34 && ft_strncmp(input + *j + 1, "-n", 2) == 0
+				&& input[*j + 3] == 34) || (input[*j] == 34
+					&& ft_strncmp(input + *j + 1, "-n", 2) == 0
+						&& input[*j + 3] == 34))
+	{
+		*j += 2;
+		return (ft_strdup("-n"));
+	}
+	return (NULL);
 }
-
-// int	space_check(char *input, int ind)
-// {
-// 	int	i;
-
-// 	i = 0;
-// 	if (ind == 0)
-// 	{
-// 		if (input[i + 1] && input[i - 1] && (input[i + 1] == ' '
-// 			|| input[i + 1] == '	') && (input[i - 1] == ' '
-// 			|| input[i - 1] == '	'))
-// 			return (0);
-// 		if (!input[i + 1] && (input[i - 1] == ' ' || input[i - 1] == '	'))
-// 			return (0);
-// 		return (1);
-// 	}
-// 	if (input[i + 2] && (input[i - 1] == ' ' || input[i - 1] == '	')
-// 		&& (input[i + 2] == ' ' || input[i + 2] == '	'))
-// 		return (0);
-// 	if (!input[i + 2] && (input[i - 1] == '	' || input[i + 2] == ' '))
-// 		return (0);
-// 	return (1);
-// }
 
 int	is_token(char *c)
 {
@@ -124,7 +116,22 @@ char	*input_read(char *input, int *j)
 	return (result);
 }
 
-char	*token_read(char *input, int *j)
+char	*file_read(char *input, int *j)
+{
+	int	i;
+	char	*result;
+
+	i = 0;
+	while (input[*j] && (input[*j] == ' ' || input[*j] == '	'))
+		*j += 1;
+	while (input[*j + i] && input [*j + i] != '	' && input[*j + i] != '	')
+		i++;
+	result = ft_substr(input, *j, i);
+	*j += i;
+	return (result);
+}
+
+char	*token_read(char *input, int *j, char **file)
 {
 	int		i;
 	char	*result;
@@ -133,10 +140,20 @@ char	*token_read(char *input, int *j)
 	while (input[*j] && (input[*j] == ' ' || input[*j] == '	'))
 		*j += 1;
 	if (!input[*j])
+	{
+		*file = NULL;
 		return (NULL);
+	}
 	while (input[i + *j] && (input[i + *j] == '|' || input[i + *j] == '>' || input[i + *j] == '<'))
 		i++;
 	result = ft_substr(input, *j, i);
+	if (input[i + *j - 1] == '<' || input[i + *j - 1] == '>')
+	{
+		*j += i;
+		*file = file_read(input, j);
+	}
+	else
+		*file = NULL;
 	*j += i;
 	return (result);
 }

@@ -6,13 +6,13 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:20:25 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/22 17:26:00 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/24 16:02:12 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	ft_unset(char **env, char *name)
+int	ft_unset(char **env, char *name)
 {
 	int	i;
 
@@ -20,13 +20,14 @@ void	ft_unset(char **env, char *name)
 	while (env[i] && ft_strncmp(env[i], name, ft_strlen(name)) != 0)
 		i++;
 	if (!env[i])
-		return ;
+		return (-1);
 	free(env[i]);
 	while (env[i])
 	{
 		env[i] = env[i + 1];
 		i++;
 	}
+	return (0);
 }
 
 char	**copy_environment(char **old, int ind)
@@ -64,7 +65,7 @@ int	add_var(char ***ev, char *arg, int i)
 	return (0);
 }
 
-int	export(char ***ev, t_cmd *cmd)
+int	ft_export(char ***ev, char *arg)
 {
 	int	i;
 	char	*name;
@@ -72,23 +73,23 @@ int	export(char ***ev, t_cmd *cmd)
 
 	i = 0;
 	env = *ev;
-	while (cmd->arg[i] && cmd->arg[i] != '=')
+	while (arg[i] && arg[i] != '=')
 		i++;
-	if (!cmd->arg[i] || !cmd->arg[i + 1])
+	if (!arg[i] || !arg[i + 1])
 	{
 		printf("Invalid argument format for export\n");
 		return (-1);
 	}
-	name = ft_substr(cmd->arg, 0, i - 1);
+	name = ft_substr(arg, 0, i - 1);
 	while (env[i] && ft_strncmp(env[i], name, ft_strlen(name)))
 		i++;
 	free(name);
 	if (!env[i])
-		return(add_var(ev, cmd->arg, i));
+		return(add_var(ev, arg, i));
 	else
 	{
 		free(env[i]);
-		env[i] = ft_strdup(cmd->arg);
+		env[i] = ft_strdup(arg);
 		return (0);
 	}
 }
