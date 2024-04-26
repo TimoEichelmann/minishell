@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:44 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/24 15:02:01 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/26 02:35:17 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ typedef struct s_basic
 	char	**env;
 }	t_basic;
 
-
 typedef struct s_shell {
 	int	file;
 	char	*path;
@@ -44,26 +43,22 @@ typedef struct s_shell {
 
 typedef	struct s_cmd {
 	char	*cmd;
-	char	*option;
-	char	*arg;
 	char	*input;
-	// char	*ired;
-	// char	*iredfile;
-	// char	*ored;
-	// char	*oredfile;
-	// char	*ireda;
-	// char	*iredfilea;
-	// char	*oreda;
-	// char	*oredfilea;
-	char	*file;
-	char	*token; //pipes
+	char	*arg;
+	int		token;
+	int		ired;
+	int		ored;
+	char	*ifile;
+	char	*ofile;
 }	t_cmd;
 
-
-typedef struct s_env {
-	char	*var;
-}	t_env;
-
+typedef	struct s_count {
+	int	i;
+	int	quote_count;
+	int	count;
+	int	count2;
+	int	j;
+} t_count;
 
 int	maintain_cd(char *input, char **env);
 char	*get_command(char **path, char *command);
@@ -77,16 +72,16 @@ char	**init_env(char **ev);
 int	substr_len(char *substr);
 void	free_cmd(t_cmd *cmd);
 void	ft_exit(char **env);
-char	*cmd_read(char *input, int *j);
+char	*cmd_read(char *input, int ind, int *j);
 int	space_check(char *input, int ind);
 int	is_token(char *c);
-char	*arg_read(char *input, int *j);
+char	*arg_read(char *input, int ind, int *j);
 char	*token_read(char *input, int *j, char **file);
-t_cmd	*parser(char *input, char **env, int ex_status);
+t_cmd	*parser(char *input/* , char **env, int ex_status */);
 int	unclosed_quotes(char *input);
 int	iterate_quotes(char *input, int ind, int i);
 char	**copy_environment(char **old, int ind);
-void	command_parser(char	*input, t_cmd **cmd, int cmd_count);
+int	command_parser(char	*input, t_cmd *c, int cmd_count);
 int	command_counter(char *input);
 int	command_lexer(t_cmd *c, char **env, int ex_status);
 int	own_lexer(t_cmd *cmd, int ind, char **env, int ex_status);
@@ -96,7 +91,7 @@ int	env_lexer(t_cmd cmd);
 int	own_check(char *cmd);
 char	*input_read(char *input, int *j);
 char	*delete_quotation(char *input);
-char	*opt_read(char *input, int *j, int ind);
+char	*opt_read(char *input, int ind, int *j);
 int	echo(t_cmd *cmd, t_basic *basic);
 int	ft_unset(char **env, char *name);
 int	add_var(char ***ev, char *arg, int i);

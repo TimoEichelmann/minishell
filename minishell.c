@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:17 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/24 16:00:37 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/26 02:28:57 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,8 +58,9 @@ void    free_memory(t_shell *shell)
 		close(shell->file);
 }
 
-void sigint_handler() 
+void sigint_handler(int signal) 
 {
+	signal--;
     printf("\n");
     rl_on_new_line();
     rl_replace_line("", 0);
@@ -151,32 +152,6 @@ void	ft_exit(char **env)
 	exit (1);
 }
 
-void	free_cmd(t_cmd *cmd)
-{
-	int	i;
-
-	i = 0;
-	if (!cmd)
-		return ;
-	while (cmd[i].cmd)
-	{
-		if (cmd[i].input)
-			free(cmd[i].input);
-		if (cmd[i].cmd)
-			free(cmd[i].cmd);
-		if (cmd[i].option)
-			free(cmd[i].option);
-		if (cmd[i].arg)
-			free(cmd[i].arg);
-		if (cmd[i].token)
-			free(cmd[i].token);
-		if (cmd[i].file)
-			free(cmd[i].file);
-		i++;
-	}
-	free(cmd);
-}
-
 int	count_pipes(t_cmd *cmd)
 {
 	int	i;
@@ -186,8 +161,7 @@ int	count_pipes(t_cmd *cmd)
 	i = 0;
 	while (cmd[i].cmd)
 	{
-		if (cmd[i].token && ft_strncmp(cmd[i].token, "|", 1) == 0)
-			result++;
+		if (cmd[i].token == 1)
 		i++;
 	}
 	return (result);
@@ -197,7 +171,8 @@ void init(t_basic *basic,char  **env)
 {
     t_cmd *cmd;
 
-	cmd = parser(basic->input, env, basic->exit_status);
+	env++;
+	cmd = parser(basic->input/*,  env, */ /* basic->exit_status */);
     if (cmd == NULL)
 	{
     	return ;

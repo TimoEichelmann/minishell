@@ -6,7 +6,7 @@
 #    By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/23 14:33:21 by snegi             #+#    #+#              #
-#    Updated: 2024/04/23 13:02:09 by teichelm         ###   ########.fr        #
+#    Updated: 2024/04/26 02:31:01 by teichelm         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,7 @@ LDFLAG		=	-lreadline -lhistory
 
 HEADER	 	=	minshell.h
 
-SRCS		=	minishell.c minishell_utl.c parser.c parser_helpers.c lexer.c env.c multi_pipe.c export.c echo.c redirection.c
+SRCS		=	minishell.c minishell_utl.c parser.c env.c multi_pipe.c export.c echo.c redirection.c
 LIBFT		=	libft.a
 
 OBJS		=	$(SRCS:.c=.o)

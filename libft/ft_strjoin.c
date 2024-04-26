@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/05 14:02:03 by teichelm          #+#    #+#             */
-/*   Updated: 2022/12/14 14:33:12 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/25 22:39:03 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,12 @@ char	*ft_strjoin(const char *s1, const char *s2)
 	p = malloc(len + 1);
 	if (!p)
 		return (0);
-	while (s1[i])
+	while (s1 && s1[i])
 	{
 		p[i] = s1[i];
 		i++;
 	}
-	while (s2[j])
+	while (s2 && s2[j])
 	{
 		p[i] = s2[j];
 		i++;

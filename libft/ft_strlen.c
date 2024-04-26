@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 12:35:14 by teichelm          #+#    #+#             */
-/*   Updated: 2022/11/30 12:42:49 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/25 22:37:54 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@ int	ft_strlen(const char *a)
 	int	i;
 
 	i = 0;
+	if (!a)
+		return (0);
 	while (a[i] != '\0')
 	{
 		i++;
