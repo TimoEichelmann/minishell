@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/05 14:02:03 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/25 22:39:03 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/30 14:55:36 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,3 +40,4 @@ char	*ft_strjoin(const char *s1, const char *s2)
 	p[i] = 0;
 	return (p);
 }
+

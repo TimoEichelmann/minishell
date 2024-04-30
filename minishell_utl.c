@@ -12,31 +12,31 @@
 
 #include "minishell.h"
 
-int count_folder(void)
+int	count_folder(void)
 {
-    char *folder;
-    int count;
-    int i;
-    
-    i = 0;
-    count = 0;
-    folder = getcwd(NULL, 0);
-    while(folder[i] != '\0' && (ft_strncmp(folder + i, "minishell",9) != 0))
-        i++;
-    while (folder[i] != '\0')
-    {
-        if (folder[i] == '/')
-            count++;
-        i++;
-    }
-    return (count);
+	char	*folder;
+	int		count;
+	int		i;
+
+	i = 0;
+	count = 0;
+	folder = getcwd(NULL, 0);
+	while (folder[i] != '\0' && (ft_strncmp(folder + i, "minishell", 9) != 0))
+		i++;
+	while (folder[i] != '\0')
+	{
+		if (folder[i] == '/')
+			count++;
+		i++;
+	}
+	return (count);
 }
 
 void	change_pwd(char **env)
 {
-	char *pwd;
-	char *old_pwd;
-	char *temp;
+	char	*pwd;
+	char	*old_pwd;
+	char	*temp;
 
 	pwd = getcwd(NULL, 0);
 	old_pwd = ft_getenv(env, "PWD");
@@ -50,24 +50,24 @@ void	change_pwd(char **env)
 	free(old_pwd);
 }
 
-int	maintain_cd(char *input, char **env) 
+int	maintain_cd(char *input, char **env)
 {
-    int count;
+	int	count;
 
-    while (*input != '\0' && *input == ' ')
-        input++;
-    if(!*input)
-    {
-        count = count_folder();
-        while(count--)
-            chdir("..");
-        return (0);
-    } 
-    if (chdir(input) != 0)
-    {
-        perror("chdir");
-        return (1);
-    }
+	while (*input != '\0' && *input == ' ')
+		input++;
+	if (!*input)
+	{
+		count = count_folder();
+		while (count--)
+			chdir("..");
+		return (0);
+	}
+	if (chdir(input) != 0)
+	{
+		perror("chdir");
+		return (1);
+	}
 	change_pwd(env);
-    return (0);
+	return (0);
 }

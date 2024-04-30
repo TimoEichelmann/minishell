@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 16:55:22 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/26 02:29:35 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/30 14:53:59 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -309,7 +309,7 @@ int	own_check(char *cmd)
 	int	i;
 
 	i = 0;
-	while(cmd[i] == '	' || cmd[i] == ' ')
+	while(cmd[i] == '	' || cmd[i] == ' ' || cmd[i] == 39 || cmd[i] == 34)
 		i++;
 	if (ft_strncmp(cmd + i, "env", 3) == 0)
 		return(1);
@@ -333,22 +333,29 @@ char	**lexer(char *input)
 {
 	int	cmd_num;
 	char	**splitted;
+	int		i;
 
+	i = 0;
 	cmd_num = count_cmds(input);
 	splitted = ft_split(input, '|');
+	while (splitted[i])
+		i++;
+	if (cmd_num != 1 && cmd_num != i - 1)
+	{
+		print_check(-2, splitted);
+		return (NULL);
+	}
 	if (checks(splitted) == -1)
 		return (NULL);
 	return (splitted);
 }
 
-char	*cmd_read(char *input, int ind, int *j)
+char	*cmd_read(char *input, int *j)
 {
 	char	*result;
 	int		i;
 	
 	i = 0;
-	if (ind < 0)
-		return (NULL);
 	result = word(input + *j);
 	while (result[i] == ' ' || result[i] == '	')
 		i++;
@@ -533,7 +540,7 @@ int	cmd_parser(t_cmd *cmd, char *input, int pipe)
 	while (input[j] == ' ' || input[j] == '	')
 		j++;
 	ind = own_check(input);
-	cmd->cmd = cmd_read(input, ind, &j);
+	cmd->cmd = cmd_read(input, &j);
 	cmd->input = ft_strdup(input);
 	cmd->arg = arg_read(input, ind, &j);
 	if (pipe == 1)
@@ -569,7 +576,235 @@ t_cmd	*cmd_creator(char **splitted)
 	return (cmd);
 }
 
-t_cmd	*parser(char *input)
+char	*paste_var(int index, char *arg, char *var, char **env)
+{
+	char 	*result;
+	int		i;
+	
+	i = 0;
+	result = malloc(sizeof(char) * (ft_strlen(arg) - ft_strlen(var)
+			+ ft_strlen(ft_getenv(env, var))));
+	while(i < index)
+	{
+		result[i] = arg[i];
+		i++;
+	}
+	index += ft_strlcpy(result + i, ft_getenv(env, var),
+				ft_strlen(ft_getenv(env, var)) + 1);
+	i += ft_strlen(var) + 1;
+	while(arg[i])
+	{
+		result[index] = arg[i];
+		index++;
+		i++;
+	}
+	result[index] = 0;
+	return (result);
+}
+
+char	*exchange(char *arg, int index, char **env)
+{
+	char	*var;
+	char	*result;
+	int		i;
+
+	i = 0;
+	var = ft_substr(arg, index + 1, substr_len(arg + index + 1));
+	if (!ft_getenv(env, var))
+	{
+		free(var);
+		free(arg);
+		return (NULL);
+	}
+	result = paste_var(index, arg, var, env);
+	free(var);
+	free(arg);
+	return (result);
+}
+
+void	ft_paste(char *result, char *str, char *num)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	j = 0;
+	while (str[i] && (str[i] != '$' && str[i + 1] != '?'))
+	{
+		result[i] = str[i];
+		i++;
+	}
+	while (num[j])
+	{
+		result[i + j] = num[j];
+		j++;	
+	}
+	i += j;
+	while (str[i - j + 2])
+	{
+		result[i] = str[i - j + 2];
+		i++;
+	}
+	result[i] = 0;
+}
+
+char *paste_ex_status(char *str, int ex_status)
+{
+	char	*result;
+	char	*num;
+	
+	num = ft_itoa(ex_status);
+	result = malloc(sizeof(char) * (ft_strlen(str) - 1 + ft_strlen(num)));
+	ft_paste(result, str, num);
+	free(str);
+	free(num);
+	return (result);
+}
+
+char	*paste_tilde(int index, char *str, char *result, char **env)
+{
+	int	i;
+	int	j;
+	
+	j = 0;
+	i = 0;
+	while (i < index)
+	{
+		result[i] = str[i];
+		i++;
+	}
+	j += ft_strlcpy(result + i, ft_getenv(env, "HOME\0"), ft_strlen(ft_getenv(env, "HOME\0")));
+	i++;
+	while (str[i])
+	{
+		result[i + j] = str[i];
+		i++;
+	}
+	result[j + i] = 0;
+	free(str);
+	return (result);
+}
+
+char	*tilde_expansion(char *str, int index, char **env)
+{
+	int	i;
+	int	count;
+	char	*result;
+
+	i = 0;
+	count = 0;
+	while (i < index)
+	{
+		if (str[i] == 34)
+			count++;
+		i++;
+	}
+	if (count % 2 == 1)
+		return (str);
+	result = malloc(sizeof(char) * (ft_strlen(str) + 1
+						+ ft_strlen(ft_getenv(env, "HOME\0"))));
+	return (paste_tilde(index, str, result, env));
+}
+
+char	*expander(char *str, char **env, int ex_status)
+{
+	int		i;
+	int		quote_count;
+	char	*arg;
+
+	i = 0;
+	quote_count = 0;
+	while (str && str[i])
+	{
+		if (str[i] == 39)
+			quote_count++;
+		if (str[i] == '$' && str[i + 1] == '?')
+			str = paste_ex_status(str, ex_status);
+		if (str[i] == '$' && quote_count % 2 != 1 && str[i + 1]
+			&& ft_isprint(str[i + 1]) == 1 && str[i + 1] != '?')
+		{
+			arg = str;
+			str = exchange(arg, i, env);
+		}
+		if (str[i] == '~' && quote_count % 2 != 1)
+			str = tilde_expansion(str, i, env);
+		i++;
+	}
+	return (str);
+}
+
+char	*delete_quotation(char *input)
+{
+	t_count	c;
+	char	*result;
+
+	c.i = 0;
+	c.j = 0;
+	c.count = 0;
+	while (input[c.i])
+	{
+		if (input[c.i] == 34 || input[c.i] == 39)
+			c.count++;
+		c.i++;
+	}
+	result = malloc(sizeof(char) * (ft_strlen(input) - c.count + 1));
+	c.i = 0;
+	while (input[c.i + c.j])
+	{
+		while (input[c.i + c.j] && (input[c.i + c.j] == 34 || input[c.i + c.j] == 39))
+			c.j++;
+		result[c.i] = input[c.i + c.j];
+		if (input[c.i + c.j])
+			c.i++;
+	}
+	result[c.i] = 0;
+	free(input);
+	return (result);
+}
+
+int	remove_quotation(t_cmd *cmd)
+{
+	char	*temp;
+
+	if (cmd->input)
+	{
+		cmd->input = delete_quotation(cmd->input);
+		temp = cmd->input;
+		cmd->input = ft_strtrim(cmd->input, " 	");
+		free(temp);
+	}
+	if (cmd->cmd)
+	{
+		cmd->cmd = delete_quotation(cmd->cmd);
+		temp = cmd->cmd;
+		cmd->cmd = ft_strtrim(cmd->cmd, " 	");
+		free(temp);
+	}
+	if (cmd->arg)		
+	{
+		cmd->arg = delete_quotation(cmd->arg);
+		temp = cmd->arg;
+		cmd->arg = ft_strtrim(cmd->arg, " 	");
+		free(temp);
+	}
+	return (0);
+}
+
+void	expansion(t_cmd *cmd, char **env, int ex)
+{
+	int	i;
+
+	i = 0;
+	while(cmd[i].cmd)
+	{
+		cmd[i].arg = expander(cmd[i].arg, env, ex);
+		cmd[i].input = expander(cmd[i].input, env, ex);
+		remove_quotation(&cmd[i]);
+		i++;
+	}
+}
+
+t_cmd	*parser(char *input, char **env, int ex)
 {
 	char	**splitted;
 	t_cmd	*cmd;
@@ -582,6 +817,8 @@ t_cmd	*parser(char *input)
 	if (!splitted)
 		return (NULL);
 	cmd = cmd_creator(splitted);
+	if (cmd[0].cmd)
+		expansion(cmd, env, ex);
 	return (cmd);
 }
 
@@ -607,10 +844,13 @@ void	free_cmd(t_cmd *cmd)
 	free(cmd);
 }
 
-// int main(void)
+// int main(int argc, char **argv, char **env)
 // {
+// 	int	ex = -1;
+// 	if (argc > 1 && argv)
+// 		return (-1);
 // 	char *input = readline(">");
-// 	t_cmd *cmd = parser(input);
+// 	t_cmd *cmd = parser(input, env, ex);
 // 	int i =0;
 // 	while (cmd[i].cmd)
 // 	{

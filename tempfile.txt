@@ -1,2 +1,1 @@
-hsh
-jd
+cat < test.txt > out | cat

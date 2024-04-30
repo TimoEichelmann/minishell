@@ -12,57 +12,55 @@
 
 #include "minishell.h"
 
-void redirect_input(char *delimiter, t_shell *shell)
+void	redirect_input(char *delimiter, t_shell *shell)
 {
-	char *input;
+	char	*input;
 
-    shell->file = open("tempfile.txt", O_CREAT | O_WRONLY | O_TRUNC, 0644);
-    if (shell->file == -1)
-        return;
-    while ((input = readline("> ")) != NULL) 
-    {
-        if (strcmp(input, delimiter) == 0) {
-            free(input);
-            break;
-        }
-        write(shell->file, input, strlen(input));
-        write(shell->file, "\n", 1);
-        free(input);
-    }
-    close(shell->file);
-    shell->file = open("tempfile.txt", O_RDONLY);
-    if (shell->file == -1)
-        return;
-    dup2(shell->file, 0);
+	shell->file = open("tempfile.txt", O_CREAT | O_WRONLY | O_TRUNC, 0644);
+	if (shell->file == -1)
+		return ;
+	input = readline("> ");
+	while (input != NULL) 
+	{
+		if (strcmp(input, delimiter) == 0) 
+		{
+			free(input);
+			break ;
+		}
+		write(shell->file, input, strlen(input));
+		write(shell->file, "\n", 1);
+		free(input);
+		input = readline("> ");
+	}
+	close(shell->file);
+	shell->file = open("tempfile.txt", O_RDONLY);
 }
 
 int	token_check(t_cmd *cmd, t_shell *shell)
 {
-	if (cmd->token != NULL && ft_strncmp(cmd->token, "<\0" , 2) == 0)
+	shell->file = 0;
+	shell->ofile = 0;
+	if (cmd->ifile != NULL)
 	{
-		shell->file = open(cmd->file, O_RDONLY);
-		if(shell->file < 0)
-			return(-1);
+		if (cmd->ired == 1)
+			shell->file = open(cmd->ifile, O_RDONLY);
+		else
+			redirect_input(cmd->ifile, shell);
+		if (shell->file < 0)
+			return (-1);
 		dup2(shell->file, 0);
+		close(shell->file);
 	}
-	else if (cmd->token != NULL && ft_strncmp(cmd->token, "<<\0" ,3) == 0)
-		redirect_input(cmd->file, shell);
-	else if (cmd->token != NULL && ft_strncmp(cmd->token, ">\0" , 2) == 0)
+	if (cmd->ofile != NULL)
 	{
-		shell->file = open(cmd->file, O_TRUNC | O_CREAT | O_RDWR, 0644);
-		if (shell->file < 0)
+		if (cmd->ored == 1)
+			shell->ofile = open(cmd->ofile, O_TRUNC | O_CREAT | O_RDWR, 0644);
+		else
+			shell->ofile = open(cmd->ofile, O_CREAT | O_RDWR | O_APPEND, 0644);
+		if (shell->ofile < 0)
 			return (-1);
-		dup2(shell->file,1);
+		dup2(shell->ofile, 1);
+		close(shell->ofile);
 	}
-	else if (cmd->token != NULL && ft_strncmp(cmd->token, ">>\0" , 3) == 0)
-	{
-		shell->file = open(cmd->file, O_CREAT | O_RDWR | O_APPEND, 0644);
-		if (shell->file < 0)
-			return (-1);
-		dup2(shell->file,1);
-	}
-	else
-		return (0);
-	close(shell->file);
-	return (1);
+	return (0);
 }

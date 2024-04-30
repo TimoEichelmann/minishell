@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:20:25 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/24 16:02:12 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/30 16:12:16 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ char	**copy_environment(char **old, int ind)
 
 int	add_var(char ***ev, char *arg, int i)
 {
-	char **env;
+	char	**env;
 
 	env = copy_environment(*ev, 0);
 	env[i] = ft_strdup(arg);
@@ -65,27 +65,46 @@ int	add_var(char ***ev, char *arg, int i)
 	return (0);
 }
 
-int	ft_export(char ***ev, char *arg)
+int	solo_export(char **env)
 {
 	int	i;
+
+	i = 0;
+	while (env[i])
+	{
+		printf("%s\n", env[i]);
+		i++;
+	}
+	return (0);
+}
+
+int	bad_assignment(void)
+{
+	printf("%s\n", "minishell: bad assignment");
+	return (-1);
+}
+
+int	ft_export(char ***ev, char *arg)
+{
+	int		i;
 	char	*name;
 	char	**env;
 
 	i = 0;
 	env = *ev;
+	if (!arg)
+		return (solo_export(env));
 	while (arg[i] && arg[i] != '=')
 		i++;
-	if (!arg[i] || !arg[i + 1])
-	{
-		printf("Invalid argument format for export\n");
-		return (-1);
-	}
-	name = ft_substr(arg, 0, i - 1);
-	while (env[i] && ft_strncmp(env[i], name, ft_strlen(name)))
+	if (arg[i] == '=' && (arg[i + 1] == ' ' || arg[i + 1] == '	'
+			|| arg[i - 1] == ' ' || arg[i - 1] == '	'))
+		return (bad_assignment());
+	name = ft_substr(arg, 0, i);
+	while (env[i] && ft_strncmp(env[i], name, ft_strlen(name)) != 0)
 		i++;
 	free(name);
 	if (!env[i])
-		return(add_var(ev, arg, i));
+		return (add_var(ev, arg, i));
 	else
 	{
 		free(env[i]);

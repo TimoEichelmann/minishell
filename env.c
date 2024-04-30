@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:18:06 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/23 11:27:06 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/04/30 16:00:41 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,17 +67,28 @@ void	del_env(char **env)
 	free(env);
 }
 
+int	true_env(char *env)
+{
+	int	i;
+
+	i = 0;
+	while (env[i] && env[i] != '=')
+		i++;
+	if (!env[i] || (env[i] == '=' && !env[i + 1]))
+		return (-1);
+	return (0);
+}
+
 int	ft_env(char **env)
 {
 	int		i;
 
 	i = 0;
-	while (env[i])
+	while (env && env[i])
 	{
-		printf("%s\n", env[i]);
+		if (true_env(env[i]) == 0)
+			printf("%s\n", env[i]);
 		i++;
 	}
 	return (0);
 }
-
-
