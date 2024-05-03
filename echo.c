@@ -21,7 +21,7 @@ int	echo(t_cmd *cmd)
 	ind = 0;
 	if (!cmd->arg)
 	{
-		write(1, "\n", 1);
+		printf("\n");
 		return (0);
 	}
 	if (strncmp(cmd->arg, "-n", 2) == 0)
@@ -33,7 +33,7 @@ int	echo(t_cmd *cmd)
 	}
 	while (cmd->arg[i])
 	{
-		write(1, &cmd->arg[i], 1);
+		printf("%c", cmd->arg[i]);
 		i++;
 	}
 	if (ind == 0)

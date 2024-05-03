@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:17 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/30 15:52:29 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/03 15:14:35 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,10 @@ void	init(t_basic *basic)
 	cmd = parser(basic->input, basic->env, basic->exit_status);
 	if (cmd == NULL)
 	{
-		printf("Not Correct format, please try again!!");
+		printf("Not Correct format, please try again!\n");
 	 	return ;
 	}
-	 basic->pipe_num = count_pipes(cmd);
+	basic->pipe_num = count_pipes(cmd);
 	if (basic->pipe_num < 1)
 	 	single_exec(cmd, basic);
 	else

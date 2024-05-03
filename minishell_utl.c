@@ -61,6 +61,7 @@ int	maintain_cd(char *input, char **env)
 		count = count_folder();
 		while (count--)
 			chdir("..");
+		change_pwd(env);
 		return (0);
 	}
 	if (chdir(input) != 0)

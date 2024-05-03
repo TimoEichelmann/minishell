@@ -44,7 +44,7 @@ int	token_check(t_cmd *cmd, t_shell *shell)
 	{
 		if (cmd->ired == 1)
 			shell->file = open(cmd->ifile, O_RDONLY);
-		else
+		if (cmd->ired == 2)
 			redirect_input(cmd->ifile, shell);
 		if (shell->file < 0)
 			return (-1);
@@ -55,7 +55,7 @@ int	token_check(t_cmd *cmd, t_shell *shell)
 	{
 		if (cmd->ored == 1)
 			shell->ofile = open(cmd->ofile, O_TRUNC | O_CREAT | O_RDWR, 0644);
-		else
+		if (cmd->ored == 2)
 			shell->ofile = open(cmd->ofile, O_CREAT | O_RDWR | O_APPEND, 0644);
 		if (shell->ofile < 0)
 			return (-1);

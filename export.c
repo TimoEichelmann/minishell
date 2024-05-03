@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:20:25 by teichelm          #+#    #+#             */
-/*   Updated: 2024/04/30 16:12:16 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/03 13:42:03 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,8 +96,8 @@ int	ft_export(char ***ev, char *arg)
 		return (solo_export(env));
 	while (arg[i] && arg[i] != '=')
 		i++;
-	if (arg[i] == '=' && (arg[i + 1] == ' ' || arg[i + 1] == '	'
-			|| arg[i - 1] == ' ' || arg[i - 1] == '	'))
+	if ((arg[i] == '=' && (arg[i + 1] == ' ' || arg[i + 1] == '	'
+			|| arg[i - 1] == ' ' || arg[i - 1] == '	')) || !arg[i])
 		return (bad_assignment());
 	name = ft_substr(arg, 0, i);
 	while (env[i] && ft_strncmp(env[i], name, ft_strlen(name)) != 0)

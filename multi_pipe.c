@@ -12,20 +12,15 @@
 
 #include "minishell.h"
 
-void	operate_pipe(t_basic *basic, int i, int **fd , t_shell *shell)
+void	operate_pipe(t_basic *basic, int i, int **fd, t_shell *shell)
 {
 	int	j;
 
 	j = 0;
-	printf("%d.......%d\n",shell->file, shell->ofile);
 	if (i > 0 && shell->file == 0)
 		dup2(fd[i - 1][0], 0);
-	else
-		close(fd[i-1][0]);
 	if (i < basic->pipe_num && shell->ofile == 0)
 		dup2(fd[i][1], 1);
-	else
-		close(fd[i][1]);
 	while (j < basic->pipe_num) 
 	{
 		if (i == j)
@@ -44,30 +39,29 @@ void	operate_pipe(t_basic *basic, int i, int **fd , t_shell *shell)
 void	execution(int i, int **fd, t_cmd *cmd, t_basic *basic)
 {
 	t_shell	shell;
-	//int		cmd_id;
 
+	shell.command = NULL;
 	if (token_check(&cmd[i], &shell) == -1)
- 		printf("No such file exist \n");
+		printf("No such file exist \n");
 	else
 	{
 		operate_pipe(basic, i, fd, &shell);
-		// cmd_id = own_check(cmd[i].cmd); 
-		// if (cmd_id == 4 || cmd_id == 2 || cmd_id == 3) 
-		// 	printf("");
-		// if (cmd_id == 1 || cmd_id == 5 || cmd_id == 6)
-		// 	exit (our_functions(cmd, basic));
-		// if (cmd_id == -1)
-		// {
-		// 	shell.command_arg = ft_split(cmd[i].input, ' ');
-		// 	shell.path = getenv("PATH");
-		// 	shell.command_path = ft_split(shell.path, ':');
-		// 	shell.command = get_command(shell.command_path, shell.command_arg[0]);
-		// 	if (shell.command == NULL)
-		// 		printf("No Such Command.\n");
-		// 	else if (execve(shell.command, shell.command_arg, basic->env) == -1)
-		// 		perror("execve failed.");
-		// 	free_memory(&shell);
-		//}
+		if (our_functions(&cmd[i], basic) == -1)
+		{
+			if (!(check_path(cmd[i].input, &shell)) && ft_getenv(basic->env, "PATH"))
+			{
+				shell.command_arg = ft_split(cmd[i].input, ' ');
+				shell.path = ft_getenv(basic->env, "PATH");
+				shell.command_path = ft_split(shell.path, ':');
+				shell.command = get_command(shell.command_path,
+						shell.command_arg[0]);
+			}
+			if (shell.command == NULL)
+				print_error("No Such Command.\n");
+			else if (execve(shell.command, shell.command_arg, basic->env) == -1)
+				perror("execve failed.");
+			free_memory(&shell);
+		}
 	}
 	exit (0);
 }

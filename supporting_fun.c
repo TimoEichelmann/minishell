@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 12:41:18 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/30 16:14:42 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/03 13:35:46 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 void	print_error(char *str)
 {
 	printf("%s", str);
-	exit(0);
+	strerror(5);
 }
 
 void	free_memory(t_shell *shell)
@@ -46,7 +46,7 @@ void	free_memory(t_shell *shell)
 void	ft_exit(char **env)
 {
 	del_env(env);
-	exit (1);
+	exit (0);
 }
 
 void	ft_pwd(t_basic *basic)
@@ -68,18 +68,26 @@ void	ft_pwd(t_basic *basic)
 
 int	our_functions(t_cmd *cmd, t_basic *basic)
 {
+	if (!ft_getenv(basic->env, "PATH"))
+		return (-5);
 	if (ft_strncmp(cmd->cmd, "env", 3) == 0)
-		basic->exit_status = ft_env(basic->env);
+		ft_env(basic->env);
 	else if (ft_strncmp(cmd->cmd, "unset", 5) == 0)
-		basic->exit_status = ft_unset(basic->env, cmd->arg);
+		ft_unset(basic->env, cmd->arg);
 	else if (ft_strncmp(cmd->cmd, "export", 6) == 0)
-		basic->exit_status = ft_export(&basic->env, cmd->arg);
+	{
+		if (ft_export(&basic->env, cmd->arg) == -1)
+			exit(7);
+	}
 	else if (ft_strncmp(cmd->cmd, "cd", 2) == 0)
-		basic->exit_status = basic->exit_status = maintain_cd(basic->input + 2, basic->env);
+	{
+		if (maintain_cd(basic->input + 2, basic->env) == 1)
+			exit(6);
+	}
 	else if (ft_strncmp(cmd->cmd, "exit", 5) == 0)
 		ft_exit(basic->env);
 	else if (ft_strncmp(cmd->cmd, "echo", 4) == 0)
-		basic->exit_status = echo(cmd);
+		echo(cmd);
 	else if (ft_strncmp(cmd->cmd, "pwd", 3) == 0)
 		ft_pwd(basic);
 	else
