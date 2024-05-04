@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:44 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/03 15:08:30 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/04 22:42:20 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,15 +34,15 @@ typedef struct s_basic
 }	t_basic;
 
 typedef struct s_shell {
-	int	file;
-	int	ofile;
+	int		file;
+	int		ofile;
 	char	*path;
 	char	**command_path;
 	char	**command_arg;
 	char	*command;
 }	t_shell;
 
-typedef	struct s_cmd {
+typedef struct s_cmd {
 	char	*cmd;
 	char	*input;
 	char	*arg;
@@ -53,13 +53,13 @@ typedef	struct s_cmd {
 	char	*ofile;
 }	t_cmd;
 
-typedef	struct s_count {
+typedef struct s_count {
 	int	i;
 	int	quote_count;
 	int	count;
 	int	count2;
 	int	j;
-} t_count;
+}	t_count;
 
 void	print_error(char *str);
 void	ft_exit(char **env);
@@ -124,7 +124,7 @@ t_cmd	*cmd_creator(char **splitted);
 char	*paste_var(int index, char *arg, char *var, char **env);
 char	*exchange(char *arg, int index, char **env);
 void	ft_paste(char *result, char *str, char *num);
-char 	*paste_ex_status(char *str, int ex_status);
+char	*paste_ex_status(char *str, int ex_status);
 char	*paste_tilde(int index, char *str, char *result, char **env);
 char	*tilde_expansion(char *str, int index, char **env);
 char	*expander(char *str, char **env, int ex_status);

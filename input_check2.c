@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   input_check2.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:40:11 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/03 14:40:39 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/04 22:46:57 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ char	*realloc_redirection(char *str, int i)
 	}
 	result[j + 1] = '\0';
 	free(str);
-	return (result);	
+	return (result);
 }
 
 int	parse_redirections(char	**str, int i)
@@ -74,8 +74,8 @@ int	parse_redirections(char	**str, int i)
 	{
 		if (s[c.i] == 34 || s[c.i] == 39)
 			c.quote_count++;
-		if ((s[c.i] == '<' || s[c.i] == '>') && c.quote_count % 2 != 1 
-				&& s[c.i - 1] != '<' && s[c.i - 1] != '>')
+		if ((s[c.i] == '<' || s[c.i] == '>') && c.quote_count % 2 != 1
+			&& s[c.i - 1] != '<' && s[c.i - 1] != '>')
 		{
 			str[i] = realloc_redirection(s, c.i);
 			c.i += c.count;
@@ -84,16 +84,16 @@ int	parse_redirections(char	**str, int i)
 		if (!str[i])
 			return (-1);
 		s = str[i];
-		c.i++;	
+		c.i++;
 	}
 	return (0);
 }
 
 int	check_redirections(char **s)
 {
-	t_count c;
+	t_count	c;
 	int		j;
-	
+
 	c.i = 0;
 	c.quote_count = 0;
 	c.count = 0;

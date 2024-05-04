@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser3.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:44:55 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/03 14:45:22 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/04 22:57:17 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 char	**lexer(char *input)
 {
-	int	cmd_num;
+	int		cmd_num;
 	char	**splitted;
 	int		i;
 
@@ -37,7 +37,7 @@ char	*cmd_read(char *input, int *j)
 {
 	char	*result;
 	int		i;
-	
+
 	i = 0;
 	result = word(input + *j);
 	while (result[i] == ' ' || result[i] == '	')
@@ -48,7 +48,7 @@ char	*cmd_read(char *input, int *j)
 
 int	check_true_arg(char *input)
 {
-	t_count c;
+	t_count	c;
 
 	c.i = 0;
 	c.quote_count = 0;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expander1.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:41:42 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/03 15:13:51 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/04 22:58:34 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ void	ft_paste(char *result, char *str, char *num)
 	while (num[j])
 	{
 		result[i + j] = num[j];
-		j++;	
+		j++;
 	}
 	i += j;
 	while (str[i - j + 2])
@@ -38,11 +38,11 @@ void	ft_paste(char *result, char *str, char *num)
 	result[i] = 0;
 }
 
-char *paste_ex_status(char *str, int ex_status)
+char	*paste_ex_status(char *str, int ex_status)
 {
 	char	*result;
 	char	*num;
-	
+
 	num = ft_itoa(ex_status);
 	result = malloc(sizeof(char) * (ft_strlen(str) - 1 + ft_strlen(num)));
 	ft_paste(result, str, num);
@@ -55,7 +55,7 @@ char	*paste_tilde(int index, char *str, char *result, char **env)
 {
 	int	i;
 	int	j;
-	
+
 	j = 0;
 	i = 0;
 	while (i < index)
@@ -63,7 +63,8 @@ char	*paste_tilde(int index, char *str, char *result, char **env)
 		result[i] = str[i];
 		i++;
 	}
-	j += ft_strlcpy(result + i, ft_getenv(env, "HOME\0"), ft_strlen(ft_getenv(env, "HOME\0") - 1));
+	j += ft_strlcpy(result + i,
+			ft_getenv(env, "HOME\0"), ft_strlen(ft_getenv(env, "HOME\0") - 1));
 	i++;
 	while (str[i])
 	{
@@ -77,8 +78,8 @@ char	*paste_tilde(int index, char *str, char *result, char **env)
 
 char	*tilde_expansion(char *str, int index, char **env)
 {
-	int	i;
-	int	count;
+	int		i;
+	int		count;
 	char	*result;
 
 	i = 0;
@@ -92,7 +93,7 @@ char	*tilde_expansion(char *str, int index, char **env)
 	if (count % 2 == 1)
 		return (str);
 	result = malloc(sizeof(char) * (ft_strlen(str) + 1
-						+ ft_strlen(ft_getenv(env, "HOME\0"))));
+				+ ft_strlen(ft_getenv(env, "HOME\0"))));
 	return (paste_tilde(index, str, result, env));
 }
 

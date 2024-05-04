@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser.c                                           :+:      :+:    :+:   */
+/*   parser1.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 16:55:22 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/03 14:45:33 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/04 22:56:04 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ t_cmd	*cmd_creator(char **splitted)
 	int		i;
 	t_cmd	*cmd;
 	int		pipe;
-	
+
 	i = 0;
 	pipe = 0;
 	while (splitted[i])
@@ -87,7 +87,7 @@ t_cmd	*parser(char *input, char **env, int ex)
 {
 	char	**splitted;
 	t_cmd	*cmd;
-	
+
 	cmd = NULL;
 	splitted = NULL;
 	if (!input[0])
@@ -101,25 +101,26 @@ t_cmd	*parser(char *input, char **env, int ex)
 	return (cmd);
 }
 
-void    free_cmd(t_cmd *cmd)
+void	free_cmd(t_cmd *cmd)
 {
-    int i;
-    i = 0;
-    while (cmd[i].cmd)
-    {
-        if (cmd[i].cmd)
-            free(cmd[i].cmd);
-        if (cmd[i].arg)
-            free(cmd[i].arg);
-        if (cmd[i].input)
-            free(cmd[i].input);
-        if (cmd[i].ifile)
-            free(cmd[i].ifile);
-        if (cmd[i].ofile)
-            free(cmd[i].ofile);
-        cmd[i].ored = 0;
-        cmd[i].ired = 0;
-        i++;
-    }
-    free(cmd);
+	int	i;
+
+	i = 0;
+	while (cmd[i].cmd)
+	{
+		if (cmd[i].cmd)
+			free(cmd[i].cmd);
+		if (cmd[i].arg)
+			free(cmd[i].arg);
+		if (cmd[i].input)
+			free(cmd[i].input);
+		if (cmd[i].ifile)
+			free(cmd[i].ifile);
+		if (cmd[i].ofile)
+			free(cmd[i].ofile);
+		cmd[i].ored = 0;
+		cmd[i].ired = 0;
+		i++;
+	}
+	free(cmd);
 }

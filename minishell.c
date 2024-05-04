@@ -3,17 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:17 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/03 15:14:35 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/04 22:43:20 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	sigint_handler()
+int	bad_assignment(void)
 {
+	printf("%s\n", "minishell: bad assignment");
+	return (-1);
+}
+
+void	sigint_handler(int signal)
+{
+	signal--;
 	printf("\n");
 	rl_on_new_line();
 	rl_replace_line("", 0);
@@ -38,11 +45,11 @@ void	init(t_basic *basic)
 	if (cmd == NULL)
 	{
 		printf("Not Correct format, please try again!\n");
-	 	return ;
+		return ;
 	}
 	basic->pipe_num = count_pipes(cmd);
 	if (basic->pipe_num < 1)
-	 	single_exec(cmd, basic);
+		single_exec(cmd, basic);
 	else
 		main_exec(basic, cmd);
 	free_cmd(cmd);

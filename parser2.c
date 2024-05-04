@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser2.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:44:41 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/03 14:45:36 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/04 22:58:58 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ char	*arg_read(char *input, int ind, int *j)
 	char	*result;
 	char	*pot;
 	char	*tmp;
-	
+
 	result = NULL;
 	if (ind < 0)
 		return (NULL);
@@ -42,7 +42,7 @@ char	*arg_read(char *input, int ind, int *j)
 int	redirection_need(char *input)
 {
 	t_count	c;
-	int	need;
+	int		need;
 
 	c.i = 0;
 	need = 0;

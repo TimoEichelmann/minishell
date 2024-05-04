@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   multi_pipe.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 14:38:54 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/24 16:04:09 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/04 22:47:19 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void	operate_pipe(t_basic *basic, int i, int **fd, t_shell *shell)
 		dup2(fd[i - 1][0], 0);
 	if (i < basic->pipe_num && shell->ofile == 0)
 		dup2(fd[i][1], 1);
-	while (j < basic->pipe_num) 
+	while (j < basic->pipe_num)
 	{
 		if (i == j)
 			close(fd[i][0]);

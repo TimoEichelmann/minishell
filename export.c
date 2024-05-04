@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:20:25 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/03 13:42:03 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/04 22:43:39 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,12 +78,6 @@ int	solo_export(char **env)
 	return (0);
 }
 
-int	bad_assignment(void)
-{
-	printf("%s\n", "minishell: bad assignment");
-	return (-1);
-}
-
 int	ft_export(char ***ev, char *arg)
 {
 	int		i;
@@ -97,7 +91,7 @@ int	ft_export(char ***ev, char *arg)
 	while (arg[i] && arg[i] != '=')
 		i++;
 	if ((arg[i] == '=' && (arg[i + 1] == ' ' || arg[i + 1] == '	'
-			|| arg[i - 1] == ' ' || arg[i - 1] == '	')) || !arg[i])
+				|| arg[i - 1] == ' ' || arg[i - 1] == '	')) || !arg[i])
 		return (bad_assignment());
 	name = ft_substr(arg, 0, i);
 	while (env[i] && ft_strncmp(env[i], name, ft_strlen(name)) != 0)

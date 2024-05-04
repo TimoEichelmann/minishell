@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   input_check.c                                      :+:      :+:    :+:   */
+/*   input_check1.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:39:31 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/03 14:39:42 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/04 22:56:43 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,12 @@
 
 int	check_quotation(char **splitted)
 {
-	t_count c;
+	t_count	c;
 
 	c.i = 0;
 	c.quote_count = 0;
 	c.count = 0;
-	while(splitted[c.i])
+	while (splitted[c.i])
 	{
 		while (splitted[c.i][c.count])
 		{
@@ -50,7 +50,7 @@ void	free_splitted(char **splitted)
 
 int	check_empty(char **splitted)
 {
-	t_count c;
+	t_count	c;
 
 	c.i = 0;
 	c.count = 0;

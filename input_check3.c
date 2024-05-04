@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   input_check3.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:40:54 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/03 14:41:18 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/04 22:52:04 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,14 @@ char	*word(char *p)
 	c.i = 0;
 	c.j = 0;
 	c.quote_count = 0;
-	while(p[c.j] && (p[c.j] == '	' || p[c.j] == ' '))
+	while (p[c.j] && (p[c.j] == '	' || p[c.j] == ' '))
 		c.j++;
 	while (p[c.i + c.j])
 	{
 		if (p[c.i + c.j] == 34 || p[c.i + c.j] == 39)
 			c.quote_count++;
-		if ((p[c.i + c.j] == ' ' || p[c.i + c.j] == '	') && c.quote_count % 2 != 1)
+		if ((p[c.i + c.j] == ' ' || p[c.i + c.j] == '	')
+			&& c.quote_count % 2 != 1)
 			return (ft_substr(p, c.j, c.i));
 		c.i++;
 	}
@@ -60,7 +61,7 @@ int	check_words(char **splitted)
 	while (splitted[i])
 	{
 		cmd = cmd_word_check(splitted[i]);
-		if (cmd != NULL)		
+		if (cmd != NULL)
 		{
 			printf("no such command : %s\n", cmd);
 			free(cmd);
@@ -75,7 +76,7 @@ int	checks(char **splitted)
 {
 	int	ind1;
 	int	ind2;
-	int ind3;
+	int	ind3;
 	int	ind4;
 
 	ind1 = check_quotation(splitted);
@@ -98,20 +99,20 @@ int	own_check(char *cmd)
 	int	i;
 
 	i = 0;
-	while(cmd[i] == '	' || cmd[i] == ' ' || cmd[i] == 39 || cmd[i] == 34)
+	while (cmd[i] == '	' || cmd[i] == ' ' || cmd[i] == 39 || cmd[i] == 34)
 		i++;
 	if (ft_strncmp(cmd + i, "env", 3) == 0)
-		return(1);
+		return (1);
 	if (ft_strncmp(cmd + i, "unset", 5) == 0)
-		return(2);
+		return (2);
 	if (ft_strncmp(cmd + i, "cd", 2) == 0)
-		return(3);
-    if (ft_strncmp(cmd + i, "export", 6) == 0)
-		return(4);
+		return (3);
+	if (ft_strncmp(cmd + i, "export", 6) == 0)
+		return (4);
 	if (ft_strncmp(cmd + i, "echo", 4) == 0)
-		return(5);
+		return (5);
 	if (ft_strncmp(cmd + i, "exit", 5) == 0)
-		return(6);
+		return (6);
 	if (ft_strncmp(cmd + i, "pwd", 3) == 0)
 		return (7);
 	else

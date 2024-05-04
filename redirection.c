@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redirection.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: snegi <snegi@student.42berlin.de>          +#+  +:+       +#+        */
+/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 11:15:37 by snegi             #+#    #+#             */
-/*   Updated: 2024/04/24 11:15:39 by snegi            ###   ########.fr       */
+/*   Updated: 2024/05/04 22:38:41 by timo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,9 @@ void	redirect_input(char *delimiter, t_shell *shell)
 	if (shell->file == -1)
 		return ;
 	input = readline("> ");
-	while (input != NULL) 
+	while (input != NULL)
 	{
-		if (strcmp(input, delimiter) == 0) 
+		if (strcmp(input, delimiter) == 0)
 		{
 			free(input);
 			break ;
