@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   multi_pipe.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 14:38:54 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/04 22:47:19 by timo             ###   ########.fr       */
+/*   Updated: 2024/05/10 14:53:35 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,25 +41,16 @@ void	execution(int i, int **fd, t_cmd *cmd, t_basic *basic)
 	t_shell	shell;
 
 	shell.command = NULL;
-	if (token_check(&cmd[i], &shell) == -1)
-		printf("No such file exist \n");
-	else
+	if (token_check(&cmd[i], &shell) == 0)
 	{
 		operate_pipe(basic, i, fd, &shell);
 		if (our_functions(&cmd[i], basic) == -1)
 		{
-			if (!(check_path(cmd[i].input, &shell)) && ft_getenv(basic->env, "PATH"))
-			{
-				shell.command_arg = ft_split(cmd[i].input, ' ');
-				shell.path = ft_getenv(basic->env, "PATH");
-				shell.command_path = ft_split(shell.path, ':');
-				shell.command = get_command(shell.command_path,
-						shell.command_arg[0]);
-			}
+			get_shelldata(&shell, basic, &cmd[i]);
 			if (shell.command == NULL)
 				print_error("No Such Command.\n");
 			else if (execve(shell.command, shell.command_arg, basic->env) == -1)
-				perror("execve failed.");
+				print_error("execv failed.:No Such file/directory.\n");
 			free_memory(&shell);
 		}
 	}
@@ -101,6 +92,8 @@ void	wait_process(t_basic *basic, int **fd)
 		i++;
 	}
 	i = 0;
+	if (basic->exit_status == 13)
+		basic->exit_status = 0;
 	while (i < basic->pipe_num)
 		free (fd[i++]);
 	free(fd);

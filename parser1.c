@@ -3,38 +3,35 @@
 /*                                                        :::      ::::::::   */
 /*   parser1.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 16:55:22 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/04 22:56:04 by timo             ###   ########.fr       */
+/*   Updated: 2024/05/10 13:59:50 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-char	*truncate_input(char *input)
+char	*delete_pipe(char	*input)
 {
 	t_count	c;
-	int		ind;
-	char	*tmp;
 
 	c.i = 0;
-	ind = 0;
-	c.quote_count = 0;
-	while (input[c.i] && ind == 0)
+	c.qcount34 = 0;
+	c.qcount39 = 0;
+	while (input[c.i])
 	{
-		if (input[c.i] == 34 || input[c.i] == 39)
-			c.quote_count++;
-		if ((input[c.i] == '<' || input[c.i] == '>') && c.quote_count % 2 != 1)
-			ind = 1;
+		if (input[c.i] == 34 && c.qcount39 % 2 != 1)
+			c.qcount34++;
+		if (input[c.i] == 39 && c.qcount34 % 2 != 1)
+			c.qcount39++;
+		if (input[c.i] == '|' && c.qcount39 % 2 != 1 && c.qcount34 % 2 != 1)
+		{
+			input[c.i] = 0;
+			return (input);
+		}
 		c.i++;
 	}
-	if (!input[c.i])
-		return (input);
-	tmp = input;
-	input = malloc(sizeof(char) * (c.i));
-	ft_strlcpy(input, tmp, c.i);
-	free(tmp);
 	return (input);
 }
 
@@ -48,14 +45,15 @@ int	cmd_parser(t_cmd *cmd, char *input, int pipe)
 		j++;
 	ind = own_check(input);
 	cmd->cmd = cmd_read(input, &j);
-	cmd->input = ft_strdup(input);
+	cmd->input = delete_pipe(ft_strdup(input));
 	cmd->arg = arg_read(input, ind, &j);
 	if (pipe == 1)
 		cmd->token = 1;
 	else
 		cmd->token = 0;
-	redirection_read(cmd, input, &j);
-	cmd->input = truncate_input(cmd->input);
+	cmd->ired = 0;
+	cmd->ored = 0;
+	redirection_read(cmd, input);
 	return (0);
 }
 

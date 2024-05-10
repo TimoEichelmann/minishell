@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expander1.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:41:42 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/04 22:58:34 by timo             ###   ########.fr       */
+/*   Updated: 2024/05/10 13:08:17 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,27 +99,27 @@ char	*tilde_expansion(char *str, int index, char **env)
 
 char	*expander(char *str, char **env, int ex_status)
 {
-	int		i;
-	int		quote_count;
+	t_count	c;
 	char	*arg;
 
-	i = 0;
-	quote_count = 0;
-	while (str && str[i])
+	c.i = 0;
+	c.quote_count = 0;
+	while (str && str[c.i])
 	{
-		if (str[i] == 39)
-			quote_count++;
-		if (str[i] == '$' && str[i + 1] == '?')
+		if (str[c.i] == 39)
+			c.quote_count++;
+		if (str[c.i] == '$' && str[c.i + 1] == '?' && c.quote_count % 2 != 1)
 			str = paste_ex_status(str, ex_status);
-		if (str[i] == '$' && quote_count % 2 != 1 && str[i + 1]
-			&& ft_isprint(str[i + 1]) == 1 && str[i + 1] != '?')
+		if (str[c.i] == '$' && c.quote_count % 2 != 1 && str[c.i + 1]
+			&& ft_isprint(str[c.i + 1]) == 1 && str[c.i + 1] != '?'
+				&& ft_isalpha(str[c.i + 1]) == 1)
 		{
 			arg = str;
-			str = exchange(arg, i, env);
+			str = exchange(arg, c.i, env);
 		}
-		if (str[i] == '~' && quote_count % 2 != 1)
-			str = tilde_expansion(str, i, env);
-		i++;
+		if (str[c.i] == '~' && c.quote_count % 2 != 1)
+			str = tilde_expansion(str, c.i, env);
+		c.i++;
 	}
 	return (str);
 }

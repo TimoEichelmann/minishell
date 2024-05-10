@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 12:41:18 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/03 13:35:46 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/10 15:09:14 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 void	print_error(char *str)
 {
 	printf("%s", str);
-	strerror(5);
+	exit(8);
 }
 
 void	free_memory(t_shell *shell)
@@ -43,10 +43,39 @@ void	free_memory(t_shell *shell)
 		close(shell->ofile);
 }
 
-void	ft_exit(char **env)
+int	check_numerical(char *arg)
 {
+	int	i;
+
+	i = 0;
+	while (arg[i])
+	{
+		if (ft_isdigit(arg[i]) == 0 && arg[i] != '-' && arg[i] != '+' && arg[i] != ' ')
+		{
+			return (-1);
+		}
+		i++;
+	}
+	return (0);
+}
+
+void	ft_exit(char **env, t_cmd *cmd)
+{
+	int number;
+
+	number = 6;
+	if (!cmd)
+	{
+		del_env(env);
+		exit (0);
+	}
+	if (check_numerical(cmd->arg) != 0)
+		printf("numeric argument required\n");
+	else
+		number = ft_atoi(cmd->arg);
+	free_cmd(cmd);
 	del_env(env);
-	exit (0);
+	exit (number);
 }
 
 void	ft_pwd(t_basic *basic)
@@ -68,28 +97,25 @@ void	ft_pwd(t_basic *basic)
 
 int	our_functions(t_cmd *cmd, t_basic *basic)
 {
-	if (!ft_getenv(basic->env, "PATH"))
-		return (-5);
-	if (ft_strncmp(cmd->cmd, "env", 3) == 0)
-		ft_env(basic->env);
+	if (ft_strncmp(cmd->cmd, "echo", 4) == 0)
+		return(echo(cmd));
 	else if (ft_strncmp(cmd->cmd, "unset", 5) == 0)
-		ft_unset(basic->env, cmd->arg);
+		return (ft_unset(basic->env, cmd->arg));
 	else if (ft_strncmp(cmd->cmd, "export", 6) == 0)
 	{
 		if (ft_export(&basic->env, cmd->arg) == -1)
-			exit(7);
+			return (7);
 	}
-	else if (ft_strncmp(cmd->cmd, "cd", 2) == 0)
-	{
-		if (maintain_cd(basic->input + 2, basic->env) == 1)
-			exit(6);
-	}
-	else if (ft_strncmp(cmd->cmd, "exit", 5) == 0)
-		ft_exit(basic->env);
-	else if (ft_strncmp(cmd->cmd, "echo", 4) == 0)
-		echo(cmd);
 	else if (ft_strncmp(cmd->cmd, "pwd", 3) == 0)
-		ft_pwd(basic);
+		ft_pwd(basic);	
+	else if (!ft_getenv(basic->env, "PATH"))
+		return (-5);
+	else if (ft_strncmp(cmd->cmd, "env", 3) == 0)
+		ft_env(basic->env);
+	else if (ft_strncmp(cmd->cmd, "cd", 2) == 0)
+		return (maintain_cd(cmd->input + 2, basic->env) == 1);
+	else if (ft_strncmp(cmd->cmd, "exit", 4) == 0)
+		ft_exit(basic->env, cmd);
 	else
 		return (-1);
 	return (0);

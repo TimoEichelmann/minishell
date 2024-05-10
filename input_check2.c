@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   input_check2.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:40:11 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/04 22:46:57 by timo             ###   ########.fr       */
+/*   Updated: 2024/05/10 18:37:09 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,11 +119,9 @@ int	check_redirections(char **s)
 int	print_check(int ind, char **splitted)
 {
 	if (ind == -1)
-		printf("parse error due to wrong quotation\n");
+		perror("parse error due to wrong quotation\n");
 	if (ind == -2)
-		printf("parse error due to empty command\n");
-	if (ind == -3)
-		printf("parse error due to wrong redirection\n");
+		perror("parse error due to empty command\n");
 	free_splitted(splitted);
 	return (-1);
 }

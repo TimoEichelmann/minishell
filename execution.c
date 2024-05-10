@@ -59,28 +59,31 @@ int	check_path(char *str, t_shell *shell)
 	return (1);
 }
 
+void	get_shelldata(t_shell *shell, t_basic *basic, t_cmd *cmd)
+{
+	if (!(check_path(cmd->input, shell)) && ft_getenv(basic->env, "PATH"))
+	{
+		shell->command_arg = ft_split(cmd->input, ' ');
+		shell->path = ft_getenv(basic->env, "PATH");
+		shell->command_path = ft_split(shell->path, ':');
+		shell->command = get_command(shell->command_path, 
+				shell->command_arg[0]);
+	}
+}
+
 void	shell_command(t_cmd *cmd, t_basic *basic)
 {
 	t_shell	shell;
 
 	basic->pipe_num = 0;
 	shell.command = NULL;
-	if (token_check(cmd, &shell) == -1)
-		print_error("No such file exist \n");
-	if (our_functions(cmd, basic) == -1)
+	if (token_check(cmd, &shell) == 0)
 	{
-		if (!(check_path(cmd->input, &shell)) && ft_getenv(basic->env, "PATH"))
-		{
-			shell.command_arg = ft_split(cmd->input, ' ');
-			shell.path = ft_getenv(basic->env, "PATH");
-			shell.command_path = ft_split(shell.path, ':');
-			shell.command = get_command(shell.command_path,
-					shell.command_arg[0]);
-		}
+		get_shelldata(&shell, basic, cmd);
 		if (shell.command == NULL)
 			print_error("No Such Command.\n");
 		else if (execve(shell.command, shell.command_arg, basic->env) == -1)
-			perror("execv failed.");
+			print_error("execv failed. :- No Such file/directory.\n");
 		free_memory(&shell);
 	}
 }
@@ -89,12 +92,18 @@ void	single_exec(t_cmd *cmd, t_basic *basic)
 {
 	int	pid;
 
-	pid = fork();
-	if (pid == 0)
+	basic->exit_status = our_functions(cmd, basic);
+	if (basic->exit_status == -5)
+		printf("No such file or directory\n");
+	if (basic->exit_status == -1)
 	{
-		shell_command(cmd, basic);
-		exit(0);
+		pid = fork();
+		if (pid == 0)
+		{
+			shell_command(cmd, basic);
+			exit(0);
+		}
+		else
+			waitpid(pid, &(basic->exit_status), 0);
 	}
-	else
-		waitpid(pid, &(basic->exit_status), 0);
 }

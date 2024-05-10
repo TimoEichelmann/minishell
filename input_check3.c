@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   input_check3.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:40:54 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/04 22:52:04 by timo             ###   ########.fr       */
+/*   Updated: 2024/05/10 19:15:22 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,19 @@ char	*word(char *p)
 
 	c.i = 0;
 	c.j = 0;
-	c.quote_count = 0;
-	while (p[c.j] && (p[c.j] == '	' || p[c.j] == ' '))
+	c.qcount34 = 0;
+	c.qcount39 = 0;
+	while (p[c.j] && (p[c.j] == ' ' || p[c.j] == '<' || p[c.j] == '>'))
 		c.j++;
 	while (p[c.i + c.j])
 	{
-		if (p[c.i + c.j] == 34 || p[c.i + c.j] == 39)
-			c.quote_count++;
-		if ((p[c.i + c.j] == ' ' || p[c.i + c.j] == '	')
-			&& c.quote_count % 2 != 1)
+		if (p[c.i + c.j] == 34 && c.qcount39 % 2 != 1)
+			c.qcount34++;
+		if (p[c.i + c.j] == 39 && c.qcount34 % 2 != 1)
+			c.qcount39++;
+		if (c.qcount34 % 2 != 1 && c.qcount39 % 2 != 1 && (p[c.i + c.j] == ' '
+			|| p[c.i + c.j] == '	' || p[c.i + c.j] == '|'
+				|| p[c.i + c.j] == '<' || p[c.i + c.j] == '>'))
 			return (ft_substr(p, c.j, c.i));
 		c.i++;
 	}
@@ -76,7 +80,7 @@ int	checks(char **splitted)
 {
 	int	ind1;
 	int	ind2;
-	int	ind3;
+	// int	ind3;
 	int	ind4;
 
 	ind1 = check_quotation(splitted);
@@ -85,9 +89,9 @@ int	checks(char **splitted)
 	ind2 = check_empty(splitted);
 	if (ind2 < 0)
 		return (print_check(ind2, splitted));
-	ind3 = check_redirections(splitted);
-	if (ind3 < 0)
-		return (print_check(ind3, splitted));
+	// ind3 = check_redirections(splitted);
+	// if (ind3 < 0)
+	// 	return (print_check(ind3, splitted));
 	ind4 = check_words(splitted);
 	if (ind4 < 0)
 		return (print_check(ind4, splitted));
@@ -111,7 +115,7 @@ int	own_check(char *cmd)
 		return (4);
 	if (ft_strncmp(cmd + i, "echo", 4) == 0)
 		return (5);
-	if (ft_strncmp(cmd + i, "exit", 5) == 0)
+	if (ft_strncmp(cmd + i, "exit", 4) == 0)
 		return (6);
 	if (ft_strncmp(cmd + i, "pwd", 3) == 0)
 		return (7);

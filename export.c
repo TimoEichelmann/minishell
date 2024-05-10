@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:20:25 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/04 22:43:39 by timo             ###   ########.fr       */
+/*   Updated: 2024/05/10 14:42:15 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,12 @@ int	ft_unset(char **env, char *name)
 	int	i;
 
 	i = 0;
+	while (!name)
+		return (0);
 	while (env[i] && ft_strncmp(env[i], name, ft_strlen(name)) != 0)
 		i++;
 	if (!env[i])
-		return (-1);
+		return (0);
 	free(env[i]);
 	while (env[i])
 	{
@@ -78,6 +80,28 @@ int	solo_export(char **env)
 	return (0);
 }
 
+int	ft_check_valid_identifier(char *arg, char **env, int *r)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	if (!arg)
+		return (solo_export(env));
+	while (arg[i] == ' ' || arg[i] == '	')
+		i++;
+	j = i;
+	while (arg[i] && arg[i] != '=')
+		i++;
+	if ((arg[i] == '=' && (arg[i + 1] == ' ' || arg[i + 1] == '	'
+				|| arg[i - 1] == ' ' || arg[i - 1] == '	')))
+		return (bad_assignment());
+	if (ft_isalpha(arg[j]) == 0 || ft_isalnum(arg[i - 1]) == 0)
+		return (not_identifier(ft_substr(arg, j, i - j)));
+	*r = i;
+	return (0);
+}
+
 int	ft_export(char ***ev, char *arg)
 {
 	int		i;
@@ -86,13 +110,10 @@ int	ft_export(char ***ev, char *arg)
 
 	i = 0;
 	env = *ev;
+	if (ft_check_valid_identifier(arg, env, &i) == -1)
+		return (-1);
 	if (!arg)
-		return (solo_export(env));
-	while (arg[i] && arg[i] != '=')
-		i++;
-	if ((arg[i] == '=' && (arg[i + 1] == ' ' || arg[i + 1] == '	'
-				|| arg[i - 1] == ' ' || arg[i - 1] == '	')) || !arg[i])
-		return (bad_assignment());
+		return (0);
 	name = ft_substr(arg, 0, i);
 	while (env[i] && ft_strncmp(env[i], name, ft_strlen(name)) != 0)
 		i++;

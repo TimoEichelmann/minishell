@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   input_check1.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:39:31 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/04 22:56:43 by timo             ###   ########.fr       */
+/*   Updated: 2024/05/10 12:57:52 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,20 @@ int	check_quotation(char **splitted)
 	t_count	c;
 
 	c.i = 0;
-	c.quote_count = 0;
+	c.qcount34 = 0;
+	c.qcount39 = 0;
 	c.count = 0;
 	while (splitted[c.i])
 	{
 		while (splitted[c.i][c.count])
 		{
-			if (splitted[c.i][c.count] == 34 || splitted[c.i][c.count] == 39)
-				c.quote_count++;
+			if (splitted[c.i][c.count] == 34 && c.qcount39 % 2 != 1)
+				c.qcount34++;
+			if (splitted[c.i][c.count] == 39 && c.qcount34 % 2 != 1)
+				c.qcount39++;
 			c.count++;
 		}
-		if (c.quote_count % 2 == 1)
+		if (c.qcount39 % 2 == 1 || c.qcount34 % 2 == 1)
 			return (-1);
 		c.count = 0;
 		c.i++;

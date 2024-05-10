@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expander2.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:43:09 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/04 22:45:56 by timo             ###   ########.fr       */
+/*   Updated: 2024/05/10 19:11:15 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,14 @@ char	*exchange(char *arg, int index, char **env)
 	var = ft_substr(arg, index + 1, substr_len(arg + index + 1));
 	if (!ft_getenv(env, var))
 	{
-		free(var);
-		free(arg);
-		return (NULL);
+		i = ft_strlen(var) + 1;
+		while (arg[i + index])
+		{
+			arg[index] = arg[i + index];
+			index++;
+		}
+		arg[index] = 0;
+		return (arg);
 	}
 	result = paste_var(index, arg, var, env);
 	free(var);
@@ -32,75 +37,80 @@ char	*exchange(char *arg, int index, char **env)
 	return (result);
 }
 
-char	*delete_quotation(char *i)
+int	ft_size(char *i)
+{
+	t_count	c;
+
+	c.i = 0;
+	c.quote_count = 0;
+	c.count = 0;
+	while (i[c.i])
+	{
+		if (i[c.i] == 34 && c.count % 2 == 0)
+			c.quote_count++;
+		if (i[c.i] == 39 && c.quote_count % 2 == 0)
+			c.count++;
+		c.i++;
+	}
+	return (c.i - c.count - c.quote_count + 1);
+}
+
+char	*delete_quotation(char *i, int a)
 {
 	t_count	c;
 	char	*result;
 
-	c.i = 0;
-	c.j = 0;
+	result = malloc(sizeof(char) * ft_size(i));
 	c.count = 0;
-	while (i[c.i])
+	c.quote_count = 0;
+	c.j = 0;
+	while (a < ft_size(i))
 	{
-		if (i[c.i] == 34 || i[c.i] == 39)
-			c.count++;
-		c.i++;
-	}
-	result = malloc(sizeof(char) * (ft_strlen(i) - c.count + 1));
-	c.i = 0;
-	while (i[c.i + c.j])
-	{
-		while (i[c.i + c.j] && (i[c.i + c.j] == 34 || i[c.i + c.j] == 39))
+		while ((i[a + c.j] == 34 && c.count % 2 == 0))
+		{
+			c.quote_count++;
 			c.j++;
-		result[c.i] = i[c.i + c.j];
-		if (i[c.i + c.j])
-			c.i++;
+		}
+		while ((i[a + c.j] == 39 && c.quote_count % 2 == 0))
+		{
+			c.count++;
+			c.j++;
+		}
+		result[a] = i[a + c.j];
+		a += 1;
 	}
-	result[c.i] = 0;
+	result[a - 1] = 0;
 	free(i);
 	return (result);
 }
 
-int	remove_quotation(t_cmd *cmd)
+char	*rm(char *str)
 {
 	char	*temp;
 
-	if (cmd->input)
+	if (str && str[0])
 	{
-		cmd->input = delete_quotation(cmd->input);
-		temp = cmd->input;
-		cmd->input = ft_strtrim(cmd->input, " 	");
+		temp = str;
+		str = ft_strtrim(str, " 	");
 		free(temp);
+		str = delete_quotation(str, 0);
 	}
-	if (cmd->cmd)
-	{
-		cmd->cmd = delete_quotation(cmd->cmd);
-		temp = cmd->cmd;
-		cmd->cmd = ft_strtrim(cmd->cmd, " 	");
-		free(temp);
-	}
-	if (cmd->arg)
-	{
-		cmd->arg = delete_quotation(cmd->arg);
-		temp = cmd->arg;
-		cmd->arg = ft_strtrim(cmd->arg, " 	");
-		free(temp);
-	}
-	return (0);
+	return (str);
 }
 
-void	expansion(t_cmd *cmd, char **env, int ex)
+int	remove_quotation(t_cmd *cmd)
 {
-	int	i;
-
-	i = 0;
-	while (cmd[i].cmd)
-	{
-		cmd[i].arg = expander(cmd[i].arg, env, ex);
-		cmd[i].input = expander(cmd[i].input, env, ex);
-		remove_quotation(&cmd[i]);
-		i++;
-	}
+	if (cmd->input)
+		cmd->input = rm(cmd->input);
+	if (cmd->cmd)
+		cmd->cmd = rm(cmd->cmd);
+	if (cmd->arg)
+		cmd->arg = rm(cmd->arg);
+	if (cmd->ifile)
+		cmd->ifile = rm(cmd->ifile);
+	if (cmd->ofile)
+		cmd->ofile = rm(cmd->ofile);
+	return (0);
 }
 
 char	*paste_var(int index, char *arg, char *var, char **env)
