@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:18:06 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/06 11:01:45 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:05:10 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,17 @@ char	**init_env(char **ev)
 	return (env);
 }
 
-int	substr_len(char *substr)
+int	solo_export(char **env)
 {
 	int	i;
 
 	i = 0;
-	while (substr[i] && substr[i] != ' '
-		&& substr[i] != 34 && substr[i] != 39 && substr[i] != '$')
+	while (env[i])
+	{
+		printf("%s\n", env[i]);
 		i++;
-	return (i);
+	}
+	return (0);
 }
 
 char	*ft_getenv(char **env, char *name)

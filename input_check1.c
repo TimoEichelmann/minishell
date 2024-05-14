@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:39:31 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/10 12:57:52 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/14 13:14:41 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,8 @@ int	check_empty(char **splitted)
 	while (splitted[c.i])
 	{
 		while (splitted[c.i][c.count] && (splitted[c.i][c.count] == '	'
-				|| splitted[c.i][c.count] == ' '))
+				|| splitted[c.i][c.count] == ' '
+				|| splitted[c.i][c.count] == '|'))
 			c.count++;
 		if (c.count == ft_strlen(splitted[c.i]))
 			return (-2);

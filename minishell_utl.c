@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 11:31:43 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/10 14:37:13 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:30:36 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	change_pwd(char **env)
 
 int	maintain_cd(char *input, char **env)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (*input != '\0' && *input == ' ')
@@ -41,10 +41,10 @@ int	maintain_cd(char *input, char **env)
 		input = ft_getenv(env, "HOME");
 	while (input[i])
 	{
-		if(input[i] == ' ')
+		if (input[i] == ' ')
 		{
 			printf("too many arguments\n");
-			return(1);
+			return (1);
 		}
 		i++;
 	}
@@ -55,4 +55,21 @@ int	maintain_cd(char *input, char **env)
 	}
 	change_pwd(env);
 	return (0);
+}
+
+void	ft_pwd(t_basic *basic)
+{
+	char	**ev;
+
+	ev = basic->env;
+	while (*ev && ev[0] != NULL)
+	{
+		if (strncmp(*ev, "PWD=", 4) == 0)
+		{
+			printf("%s\n", *ev + 4);
+			return ;
+		}
+		ev++;
+	}
+	printf("PWD not found\n");
 }

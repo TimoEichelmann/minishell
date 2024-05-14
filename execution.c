@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execution.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: timo <timo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:17:59 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/04 22:49:50 by timo             ###   ########.fr       */
+/*   Updated: 2024/05/14 12:30:20 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,13 +71,17 @@ void	get_shelldata(t_shell *shell, t_basic *basic, t_cmd *cmd)
 	}
 }
 
-void	shell_command(t_cmd *cmd, t_basic *basic)
+int	shell_command(t_cmd *cmd, t_basic *basic)
 {
 	t_shell	shell;
 
 	basic->pipe_num = 0;
 	shell.command = NULL;
-	if (token_check(cmd, &shell) == 0)
+	if (token_check(cmd, &shell) == 2)
+		exit(1);
+	else if (ft_strncmp(cmd->cmd, "echo", 4) == 0)
+		return (echo(cmd));
+	else
 	{
 		get_shelldata(&shell, basic, cmd);
 		if (shell.command == NULL)
@@ -85,6 +89,7 @@ void	shell_command(t_cmd *cmd, t_basic *basic)
 		else if (execve(shell.command, shell.command_arg, basic->env) == -1)
 			print_error("execv failed. :- No Such file/directory.\n");
 		free_memory(&shell);
+		exit(0);
 	}
 }
 
@@ -99,10 +104,7 @@ void	single_exec(t_cmd *cmd, t_basic *basic)
 	{
 		pid = fork();
 		if (pid == 0)
-		{
-			shell_command(cmd, basic);
-			exit(0);
-		}
+			exit (shell_command(cmd, basic));
 		else
 			waitpid(pid, &(basic->exit_status), 0);
 	}

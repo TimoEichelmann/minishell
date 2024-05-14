@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 14:38:54 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/10 14:53:35 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:30:44 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,18 +41,19 @@ void	execution(int i, int **fd, t_cmd *cmd, t_basic *basic)
 	t_shell	shell;
 
 	shell.command = NULL;
-	if (token_check(&cmd[i], &shell) == 0)
+	if (token_check(cmd, &shell) == 2) 
+		exit(0);
+	operate_pipe(basic, i, fd, &shell);
+	if (cmd == NULL)
+		exit(1);
+	if (our_functions(cmd, basic) == -1)
 	{
-		operate_pipe(basic, i, fd, &shell);
-		if (our_functions(&cmd[i], basic) == -1)
-		{
-			get_shelldata(&shell, basic, &cmd[i]);
-			if (shell.command == NULL)
-				print_error("No Such Command.\n");
-			else if (execve(shell.command, shell.command_arg, basic->env) == -1)
-				print_error("execv failed.:No Such file/directory.\n");
-			free_memory(&shell);
-		}
+		get_shelldata(&shell, basic, cmd);
+		if (shell.command == NULL)
+			print_error("No Such Command.\n");
+		else if (execve(shell.command, shell.command_arg, basic->env) == -1)
+			print_error("execv failed.:No Such file/directory.\n");
+		free_memory(&shell);
 	}
 	exit (0);
 }
@@ -69,7 +70,7 @@ int	process_fork(t_basic *basic, t_cmd *cmd, int **fd)
 		if (pid < 0)
 			return (-2);
 		if (pid == 0)
-			execution(i, fd, cmd, basic);
+			execution(i, fd, &cmd[i], basic);
 		i++;
 	}
 	return (0);
@@ -91,9 +92,9 @@ void	wait_process(t_basic *basic, int **fd)
 		waitpid(-1, &basic->exit_status, 0);
 		i++;
 	}
-	i = 0;
 	if (basic->exit_status == 13)
 		basic->exit_status = 0;
+	i = 0;
 	while (i < basic->pipe_num)
 		free (fd[i++]);
 	free(fd);

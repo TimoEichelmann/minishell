@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 11:15:37 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/10 14:59:27 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:30:52 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,10 @@ void	redirect_input(char *delimiter, t_shell *shell)
 	shell->file = open("tempfile.txt", O_RDONLY);
 }
 
-void	error(char *str)
+int	error(char *str)
 {
 	printf("%s", str);
-	exit(2);
+	return (2);
 }
 
 int	token_check(t_cmd *cmd, t_shell *shell)
@@ -53,7 +53,7 @@ int	token_check(t_cmd *cmd, t_shell *shell)
 		if (cmd->ired == 2)
 			redirect_input(cmd->ifile, shell);
 		if (shell->file < 0)
-			error("No such file or wrong permission\n");
+			return (error("No such file or wrong permission\n"));
 		dup2(shell->file, 0);
 		close(shell->file);
 	}
@@ -64,7 +64,7 @@ int	token_check(t_cmd *cmd, t_shell *shell)
 		if (cmd->ored == 2)
 			shell->ofile = open(cmd->ofile, O_CREAT | O_RDWR | O_APPEND, 0644);
 		if (shell->ofile < 0)
-			error("No such file\n");
+			return (error("No such file or wrong permission\n"));
 		dup2(shell->ofile, 1);
 		close(shell->ofile);
 	}

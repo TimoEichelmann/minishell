@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:40:11 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/10 18:37:09 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:47:33 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,9 +119,9 @@ int	check_redirections(char **s)
 int	print_check(int ind, char **splitted)
 {
 	if (ind == -1)
-		perror("parse error due to wrong quotation\n");
+		printf("parse error due to wrong quotation\n");
 	if (ind == -2)
-		perror("parse error due to empty command\n");
+		printf("parse error due to empty command\n");
 	free_splitted(splitted);
 	return (-1);
 }

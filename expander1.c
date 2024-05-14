@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:41:42 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/10 13:08:17 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:03:35 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ char	*expander(char *str, char **env, int ex_status)
 			str = paste_ex_status(str, ex_status);
 		if (str[c.i] == '$' && c.quote_count % 2 != 1 && str[c.i + 1]
 			&& ft_isprint(str[c.i + 1]) == 1 && str[c.i + 1] != '?'
-				&& ft_isalpha(str[c.i + 1]) == 1)
+			&& ft_isalpha(str[c.i + 1]) == 1)
 		{
 			arg = str;
 			str = exchange(arg, c.i, env);

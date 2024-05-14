@@ -6,32 +6,21 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:17 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/10 19:16:18 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/14 13:17:42 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	not_identifier(char *arg)
-{
-	printf("export: not an identifier: %s\n", arg);
-	free(arg);
-	return (-1);
-}
-
-int	bad_assignment(void)
-{
-	perror("minishell: bad assignment");
-	return (-1);
-}
-
 void	sigint_handler(int signal)
 {
-	signal--;
-	printf("\n");
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
+	if (signal == 2)
+	{
+		printf("\n");
+		rl_on_new_line();
+		rl_replace_line("", 0);
+		rl_redisplay();
+	}
 }
 
 int	count_pipes(t_cmd *cmd)
@@ -51,21 +40,17 @@ void	init(t_basic *basic)
 	cmd = parser(basic->input, basic->env, basic->exit_status);
 	if (cmd == NULL)
 	{
-		perror("Not Correct format, please try again!\n");
+		printf("Not Correct format, please try again!\n");
 		basic->exit_status = 1;
 		return ;
 	}
-	// int i = 0;
-	// while (cmd[i].cmd)
-	// {
-	// 	printf("i : %s c : %s a : %s if :'%d' %s of :'%d' %s\n", cmd[i].input, cmd[i].cmd, cmd[i].arg, cmd[i].ired, cmd[i].ifile, cmd[i].ored, cmd[i].ofile);
-	// 	i++;
-	// }
+	if (!cmd->input[0])
+		return ;
 	basic->pipe_num = count_pipes(cmd);
 	if (basic->pipe_num < 1)
 	{
 		if (ft_strncmp(cmd->cmd, "exit", 4) == 0)
-			ft_exit(basic->env, cmd);
+			ft_exit(basic, cmd);
 		single_exec(cmd, basic);
 	}
 	else
@@ -86,17 +71,14 @@ int	main(int ac, char **av, char **ev)
 		while (1)
 		{
 			basic.input = readline("$> ");
-			// while (basic.input != NULL)
-			// {
-			if (basic.input == NULL || !basic.input[0])
-				ft_exit(basic.env, NULL);
+			if (basic.input == NULL)
+				ft_exit(&basic, NULL);
 			if (ft_strncmp(basic.input, "", 1) != 0)
 			{
 				add_history(basic.input);
 				init(&basic);
 			}
 			free(basic.input);
-			// }
 		}
 		del_env(basic.env);
 	}

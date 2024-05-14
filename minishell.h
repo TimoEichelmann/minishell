@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:44 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/10 18:05:00 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/14 13:17:13 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ typedef struct s_count {
 }	t_count;
 
 void	print_error(char *str);
-void	ft_exit(char **env, t_cmd *cmd);
+void	ft_exit(t_basic *basic, t_cmd *cmd);
 void	free_memory(t_shell *shell);
 int		substr_len(char *substr);
 int		unclosed_quotes(char *input);
@@ -116,7 +116,7 @@ char	**lexer(char *input);
 char	*cmd_read(char *input, int *j);
 int		check_true_arg(char *input);
 char	*arg_read(char *input, int ind, int *j);
-int	redirection_need(char *input, int *ineed, int *oneed);
+int		redirection_need(char *input, int *ineed, int *oneed);
 void	redirection_read(t_cmd *cmd, char *input);
 int		cmd_parser(t_cmd *cmd, char *input, int pipe);
 t_cmd	*cmd_creator(char **splitted);
@@ -137,6 +137,10 @@ char	*remove_redirection(char *str);
 void	get_shelldata(t_shell *shell, t_basic *basic, t_cmd *cmd);
 int		bad_assignment(void);
 int		true_env(char *env);
-int	not_identifier(char *arg);
+int		not_identifier(char *arg);
+int		solo_export(char **env);
+int		splitted_size(char *input);
+char	*splitted_string(char *input, int *j);
+void	ft_pwd(t_basic *basic);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:44:55 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/10 16:55:20 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:12:03 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,86 +58,51 @@ char	*splitted_string(char *input, int *j)
 	return (NULL);
 }
 
-char	**split_input(char *input)
+void	outfile_read(t_cmd *cmd, int oneed, char *input)
 {
-	int		size;
-	char	**result;
-	int		i;
-	int		j;
-
-	i = 0;
-	j = 0;
-	size = splitted_size(input);
-	result = malloc(sizeof(char *) * (size + 1));
-	while (i < size)
-	{
-		result[i] = splitted_string(input, &j);
-		if (input[j + 1])
-			j += 1;
-		i++;
-	}
-	result[i] = NULL;
-	return (result);
+	if (input[oneed + 1] == '>')
+		cmd->ored = 2;
+	else
+		cmd->ored = 1;
+	while (input[oneed] == ' ' || input[oneed] == '>'
+		|| input[oneed] == 34 || input[oneed] == 39)
+		oneed++;
+	cmd->ofile = word(input + oneed - 1);
+	return ;
 }
 
-char	**lexer(char *input)
+void	infile_read(t_cmd *cmd, int ineed, char *input)
 {
-	int		cmd_num;
-	char	**splitted;
-	int		i;
-
-	i = 0;
-	cmd_num = count_cmds(input);
-	splitted = split_input(input);
-	while (splitted[i])
-		i++;
-	if (cmd_num != 1 && cmd_num != i - 1)
-	{
-		print_check(-2, splitted);
-		return (NULL);
-	}
-	if (checks(splitted) == -1)
-		return (NULL);
-	return (splitted);
+	if (input[ineed + 1] == '<')
+		cmd->ired = 2;
+	else
+		cmd->ired = 1;
+	while (input[ineed] == ' ' || input[ineed] == '<'
+		|| input[ineed] == 34 || input[ineed] == 39)
+		ineed++;
+	cmd->ifile = word(input + ineed - 1);
+	return ;
 }
 
-char	*cmd_read(char *input, int *j)
+void	redirection_read(t_cmd *cmd, char *input)
 {
-	char	*result;
-	int		i;
+	int	need;
+	int	oneed;
+	int	ineed;
 
-	i = 0;
-	result = word(input + *j);
-	while (result[i] == ' ' || result[i] == '	')
-		i++;
-	*j += ft_strlen(result) + i;
-	return (result);
-}
-
-int	true_env(char *env)
-{
-	int	i;
-
-	i = 0;
-	while (env[i] && env[i] != '=')
-		i++;
-	if (!env[i] || (env[i] == '=' && !env[i + 1]))
-		return (-1);
-	return (0);
-}
-
-void	expansion(t_cmd *cmd, char **env, int ex)
-{
-	int	i;
-
-	i = 0;
-	while (cmd[i].cmd)
-	{
-		cmd[i].arg = expander(cmd[i].arg, env, ex);
-		cmd[i].input = expander(cmd[i].input, env, ex);
-		cmd[i].ifile = expander(cmd[i].ifile, env, ex);
-		cmd[i].ofile = expander(cmd[i].ofile, env, ex);
-		remove_quotation(&cmd[i]);
-		i++;
-	}
+	ineed = 0;
+	oneed = 0;
+	need = redirection_need(input, &ineed, &oneed);
+	cmd->ired = 0;
+	cmd->ored = 0;
+	cmd->ifile = NULL;
+	cmd->ofile = NULL;
+	if (need == 0)
+		return ;
+	if (oneed > 0)
+		outfile_read(cmd, oneed, input);
+	if (ineed > 0)
+		infile_read(cmd, ineed, input);
+	cmd->arg = remove_redirection(cmd->arg);
+	cmd->input = remove_redirection(cmd->input);
 }

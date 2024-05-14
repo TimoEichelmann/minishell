@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:20:25 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/10 14:42:15 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:04:51 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,19 +64,6 @@ int	add_var(char ***ev, char *arg, int i)
 	env[i] = ft_strdup(arg);
 	env[i + 1] = NULL;
 	*ev = env;
-	return (0);
-}
-
-int	solo_export(char **env)
-{
-	int	i;
-
-	i = 0;
-	while (env[i])
-	{
-		printf("%s\n", env[i]);
-		i++;
-	}
 	return (0);
 }
 
