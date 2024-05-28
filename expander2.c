@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:43:09 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/14 12:06:21 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/28 13:54:04 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,13 +51,13 @@ char	*exchange(char *arg, int index, char **env)
 	return (result);
 }
 
-int	substr_len(char *substr)
+int	var_len(char *var)
 {
 	int	i;
 
 	i = 0;
-	while (substr[i] && substr[i] != ' '
-		&& substr[i] != 34 && substr[i] != 39 && substr[i] != '$')
+	while (var[i] && var[i] != ' ' && var[i] != '<' && var[i] != '>'
+		&& var[i] != 34 && var[i] != 39 && var[i] != '$')
 		i++;
 	return (i);
 }

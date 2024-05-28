@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:44 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/14 13:17:13 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/28 16:31:36 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,14 +43,9 @@ typedef struct s_shell {
 }	t_shell;
 
 typedef struct s_cmd {
-	char	*cmd;
-	char	*input;
-	char	*arg;
-	int		token;
-	int		ired;
-	int		ored;
-	char	*ifile;
-	char	*ofile;
+	char	**cmd;
+	int		end;
+	char 	**red;
 }	t_cmd;
 
 typedef struct s_count {
@@ -83,13 +78,7 @@ int		maintain_cd(char *input, char **env);
 void	free_cmd(t_cmd *cmd);
 char	*cmd_read(char *input, int *j);
 int		is_token(char *c);
-char	*arg_read(char *input, int ind, int *j);
-char	*token_read(char *input, int *j, char **file);
-t_cmd	*parser(char *input, char **env, int ex);
-char	*expander(char *str, char **env, int ex_status);
-char	*exchange(char *arg, int index, char **env);
 int		env_lexer(t_cmd cmd);
-char	*input_read(char *input, int *j);
 int		echo(t_cmd *cmd);
 int		ft_unset(char **env, char *name);
 int		add_var(char ***ev, char *arg, int i);
@@ -102,38 +91,12 @@ void	free_splitted(char **splitted);
 int		check_empty(char **splitted);
 int		check_redirections_loop(char *s, int c1, int c2, int quote_count);
 int		before(char *str, int i);
-char	*realloc_redirection(char *str, int i);
-int		parse_redirections(char	**str, int i);
-int		check_redirections(char **s);
 int		print_check(int ind, char **splitted);
-char	*word(char *p);
-char	*pot_word(char *p, int *j);
-char	*cmd_word_check(char *p);
-int		check_words(char **splitted);
 int		checks(char **splitted);
 int		own_check(char *cmd);
 char	**lexer(char *input);
 char	*cmd_read(char *input, int *j);
-int		check_true_arg(char *input);
-char	*arg_read(char *input, int ind, int *j);
-int		redirection_need(char *input, int *ineed, int *oneed);
-void	redirection_read(t_cmd *cmd, char *input);
-int		cmd_parser(t_cmd *cmd, char *input, int pipe);
-t_cmd	*cmd_creator(char **splitted);
-char	*paste_var(int index, char *arg, char *var, char **env);
-char	*exchange(char *arg, int index, char **env);
-void	ft_paste(char *result, char *str, char *num);
-char	*paste_ex_status(char *str, int ex_status);
-char	*paste_tilde(int index, char *str, char *result, char **env);
-char	*tilde_expansion(char *str, int index, char **env);
-char	*expander(char *str, char **env, int ex_status);
-char	*delete_quotation(char *input, int a);
-int		remove_quotation(t_cmd *cmd);
-void	expansion(t_cmd *cmd, char **env, int ex);
-t_cmd	*parser(char *input, char **env, int ex);
 void	free_cmd(t_cmd *cmd);
-char	*delete_redirection(char *str, int i);
-char	*remove_redirection(char *str);
 void	get_shelldata(t_shell *shell, t_basic *basic, t_cmd *cmd);
 int		bad_assignment(void);
 int		true_env(char *env);

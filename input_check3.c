@@ -6,13 +6,13 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:40:54 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/14 12:05:58 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/22 12:20:24 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-char	*word(char *p)
+char	*(char *p)
 {
 	t_count	c;
 

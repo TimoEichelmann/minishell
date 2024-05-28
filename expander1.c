@@ -6,7 +6,7 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 14:41:42 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/14 12:03:35 by teichelm         ###   ########.fr       */
+/*   Updated: 2024/05/22 12:26:52 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,29 +97,3 @@ char	*tilde_expansion(char *str, int index, char **env)
 	return (paste_tilde(index, str, result, env));
 }
 
-char	*expander(char *str, char **env, int ex_status)
-{
-	t_count	c;
-	char	*arg;
-
-	c.i = 0;
-	c.quote_count = 0;
-	while (str && str[c.i])
-	{
-		if (str[c.i] == 39)
-			c.quote_count++;
-		if (str[c.i] == '$' && str[c.i + 1] == '?' && c.quote_count % 2 != 1)
-			str = paste_ex_status(str, ex_status);
-		if (str[c.i] == '$' && c.quote_count % 2 != 1 && str[c.i + 1]
-			&& ft_isprint(str[c.i + 1]) == 1 && str[c.i + 1] != '?'
-			&& ft_isalpha(str[c.i + 1]) == 1)
-		{
-			arg = str;
-			str = exchange(arg, c.i, env);
-		}
-		if (str[c.i] == '~' && c.quote_count % 2 != 1)
-			str = tilde_expansion(str, c.i, env);
-		c.i++;
-	}
-	return (str);
-}
