@@ -33,3 +33,6 @@ Compile:
 
 Run:
 ```./minishell```
+
+## Authors
+Timo Eichelmann, [Sheetal Negi)(https://github.com/snegi02)
