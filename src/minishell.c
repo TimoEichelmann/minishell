@@ -6,56 +6,66 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:04:17 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/14 13:17:42 by teichelm         ###   ########.fr       */
+/*   Updated: 2025/11/19 14:52:38 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../inc/minishell.h"
 
-void	sigint_handler(int signal)
+void	handle_sig(int sig)
 {
-	if (signal == 2)
+	if (sig == SIGINT)
 	{
-		printf("\n");
+		g_signum = sig;
+		write(1, "\n", 1);
 		rl_on_new_line();
 		rl_replace_line("", 0);
 		rl_redisplay();
 	}
 }
 
-int	count_pipes(t_cmd *cmd)
+void	handle_exec_sig(int sig)
 {
-	int	i;
-
-	i = 0;
-	while (cmd[i].cmd)
-		i++;
-	return (i - 1);
+	if (sig == SIGINT)
+		write(2, "\n", 1);
 }
 
 void	init(t_basic *basic)
 {
 	t_cmd	*cmd;
 
-	cmd = parser(basic->input, basic->env, basic->exit_status);
-	if (cmd == NULL)
+	if (check_command(basic->input) == 1)
 	{
-		printf("Not Correct format, please try again!\n");
 		basic->exit_status = 1;
+		free(basic->input);
 		return ;
 	}
-	if (!cmd->input[0])
-		return ;
+	cmd = creator(basic->input, basic->env, basic->exit_status);
 	basic->pipe_num = count_pipes(cmd);
 	if (basic->pipe_num < 1)
 	{
-		if (ft_strncmp(cmd->cmd, "exit", 4) == 0)
-			ft_exit(basic, cmd);
-		single_exec(cmd, basic);
+		basic->exit_status = our_functions(cmd, basic);
+		if (basic->exit_status == -1)
+		{
+			if (!basic->input)
+				ft_exit(basic, cmd);
+			single_exec(cmd, basic);
+		}
 	}
 	else
 		main_exec(basic, cmd);
 	free_cmd(cmd);
+}
+
+void	input_check(t_basic *basic)
+{
+	if (basic->input == NULL)
+		ft_exit(basic, NULL);
+	if (ft_strncmp(basic->input, "", 1) != 0)
+	{
+		add_history(basic->input);
+		init(basic);
+	}
 }
 
 int	main(int ac, char **av, char **ev)
@@ -66,19 +76,17 @@ int	main(int ac, char **av, char **ev)
 	{
 		basic.exit_status = 0;
 		basic.env = init_env(ev);
-		signal(SIGINT, sigint_handler);
-		signal(SIGQUIT, SIG_IGN);
 		while (1)
 		{
+			signal(SIGINT, handle_sig);
+			signal(SIGQUIT, SIG_IGN);
 			basic.input = readline("$> ");
-			if (basic.input == NULL)
-				ft_exit(&basic, NULL);
-			if (ft_strncmp(basic.input, "", 1) != 0)
+			if (g_signum)
 			{
-				add_history(basic.input);
-				init(&basic);
+				basic.exit_status = 128 + g_signum;
+				g_signum = 0;
 			}
-			free(basic.input);
+			input_check(&basic);
 		}
 		del_env(basic.env);
 	}

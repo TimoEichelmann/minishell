@@ -6,11 +6,11 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:17:59 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/28 12:04:14 by teichelm         ###   ########.fr       */
+/*   Updated: 2025/11/19 14:52:38 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../inc/minishell.h"
 
 char	*get_command(char **path, char *command)
 {
@@ -34,25 +34,15 @@ int	check_path(char *str, t_shell *shell)
 {
 	int		i;
 	char	*str1;
-	char	**temp;
 
 	i = 0;
-	temp = ft_split(str, ' ');
-	str1 = ft_strrchr(temp[0], '/');
-	if (temp)
-	{
-		while (temp[i])
-			free(temp[i++]);
-		free(temp);
-	}
+	str1 = ft_strrchr(str, '/');
 	if (str1 == NULL)
 		return (0);
 	else
 	{
-		str1 = ft_strrchr(str, '/');
-		shell->command_arg = ft_split(str1, ' ');
 		shell->command_path = ft_split(str, ' ');
-		shell->command = shell->command_path[0];
+		shell->command = shell->command_arg[0];
 		if (access(shell->command, F_OK) != 0)
 			shell->command = NULL;
 	}
@@ -61,51 +51,70 @@ int	check_path(char *str, t_shell *shell)
 
 void	get_shelldata(t_shell *shell, t_basic *basic, t_cmd *cmd)
 {
-	if (!(check_path(cmd->input, shell)) && ft_getenv(basic->env, "PATH"))
+	char	*input;
+
+	shell->command_arg = cmd->cmd;
+	if (!(check_path(cmd->cmd[0], shell)) && ft_getenv(basic->env, "PATH"))
 	{
-		shell->command_arg = ft_split(cmd->input, ' ');
 		shell->path = ft_getenv(basic->env, "PATH");
 		shell->command_path = ft_split(shell->path, ':');
 		shell->command = get_command(shell->command_path, 
 				shell->command_arg[0]);
 	}
+	if (shell->command == NULL)
+		print_shellerror(": No Such Command.\n", cmd->cmd[0], shell, 127);
+	input = getcwd(NULL, 0);
+	if (chdir(shell->command) == 0)
+	{
+		free(input);
+		print_shellerror(":Is a directory\n", shell->command, shell, 126);
+	}
+	chdir(input);
+	free(input);
 }
 
-int	shell_command(t_cmd *cmd, t_basic *basic)
+void	shell_command(t_cmd *cmd, t_basic *basic)
 {
 	t_shell	shell;
 
-	basic->pipe_num = 0;
 	shell.command = NULL;
-	if (token_check(cmd, &shell) == 2)
-		exit(1);
-	else if (ft_strncmp(cmd->cmd, "echo", 4) == 0)
-		return (echo(cmd));
-	else
-	{
-		get_shelldata(&shell, basic, cmd);
-		if (shell.command == NULL)
-			print_error("No Such Command.\n");
-		else if (execve(shell.command, shell.command_arg, basic->env) == -1)
-			print_error("execv failed. :- No Such file/directory.\n");
-		free_memory(&shell);
+	shell.command_arg = NULL;
+	shell.command_path = NULL;
+	basic->pipe_num = 0;
+	token_check(cmd, &shell);
+	if (!cmd->cmd || cmd->cmd[0] == NULL)
 		exit(0);
+	if (cmd->cmd[0] && ft_strncmp(cmd->cmd[0], "echo\0", 5) == 0)
+		exit (echo(cmd));
+	get_shelldata(&shell, basic, cmd);
+	if (execve(shell.command, shell.command_arg, basic->env) == -1)
+	{
+		perror("execve failed");
+		free_memory(&shell);
+		exit(EXIT_FAILURE);
 	}
+	exit(0);
 }
 
 void	single_exec(t_cmd *cmd, t_basic *basic)
 {
 	int	pid;
+	int	status;
 
-	basic->exit_status = our_functions(cmd, basic);
-	if (basic->exit_status == -5)
-		printf("No such file or directory\n");
-	if (basic->exit_status == -1)
+	status = 0;
+	pid = fork();
+	if (pid == 0)
 	{
-		pid = fork();
-		if (pid == 0)
-			exit (shell_command(cmd, basic));
-		else
-			waitpid(pid, &(basic->exit_status), 0);
+		signal(SIGQUIT, SIG_DFL);
+		shell_command(cmd, basic);
+	}
+	else
+	{
+		signal(SIGINT, handle_exec_sig);
+		waitpid(pid, &status, 0);
+		if (WIFEXITED(status))
+			basic->exit_status = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
+			basic->exit_status = 128 + WTERMSIG(status);
 	}
 }

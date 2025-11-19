@@ -6,11 +6,11 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 15:18:06 by teichelm          #+#    #+#             */
-/*   Updated: 2024/05/14 12:05:10 by teichelm         ###   ########.fr       */
+/*   Updated: 2025/11/19 14:52:38 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../inc/minishell.h"
 
 char	**init_env(char **ev)
 {
@@ -51,34 +51,40 @@ char	*ft_getenv(char **env, char *name)
 	}
 	if (!env[i])
 		return (NULL);
-	while (env[i][j] != '=')
+	while (env[i][j] && env[i][j] != '=')
 		j++;
+	if (!env[i][j])
+		return (NULL);
 	return (env[i] + j + 1);
 }
 
-void	del_env(char **env)
-{
-	int	i;
-
-	i = 0;
-	while (env[i])
-	{
-		free(env[i]);
-		i++;
-	}
-	free(env);
-}
-
-int	ft_env(char **env)
+int	ft_env(char **env, t_cmd *cmd)
 {
 	int		i;
 
 	i = 0;
+	if (cmd->cmd[1])
+	{
+		printf("env: '%s' no such file or directory\n", cmd->cmd[i]);
+		return (127);
+	}
 	while (env && env[i])
 	{
 		if (true_env(env[i]) == 0)
 			printf("%s\n", env[i]);
 		i++;
 	}
+	return (0);
+}
+
+int	true_env(char *env)
+{
+	int	i;
+
+	i = 0;
+	while (env[i] && env[i] != '=')
+		i++;
+	if (!env[i])
+		return (-1);
 	return (0);
 }

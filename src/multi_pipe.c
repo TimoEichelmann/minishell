@@ -6,11 +6,11 @@
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 14:38:54 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/14 12:30:44 by teichelm         ###   ########.fr       */
+/*   Updated: 2025/11/19 14:52:38 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../inc/minishell.h"
 
 void	operate_pipe(t_basic *basic, int i, int **fd, t_shell *shell)
 {
@@ -41,24 +41,26 @@ void	execution(int i, int **fd, t_cmd *cmd, t_basic *basic)
 	t_shell	shell;
 
 	shell.command = NULL;
-	if (token_check(cmd, &shell) == 2) 
-		exit(0);
+	shell.command_arg = NULL;
+	shell.command_path = NULL;
+	token_check(cmd, &shell);
 	operate_pipe(basic, i, fd, &shell);
 	if (cmd == NULL)
 		exit(1);
 	if (our_functions(cmd, basic) == -1)
 	{
 		get_shelldata(&shell, basic, cmd);
-		if (shell.command == NULL)
-			print_error("No Such Command.\n");
-		else if (execve(shell.command, shell.command_arg, basic->env) == -1)
-			print_error("execv failed.:No Such file/directory.\n");
+		if (execve(shell.command, shell.command_arg, basic->env) == -1)
+		{
+			perror("execve failed");
+			free_memory(&shell);
+			exit(EXIT_FAILURE);
+		}
 		free_memory(&shell);
 	}
-	exit (0);
 }
 
-int	process_fork(t_basic *basic, t_cmd *cmd, int **fd)
+int	process_fork(t_basic *basic, t_cmd *cmd, int **fd, pid_t *pids)
 {
 	int		i;
 	pid_t	pid;
@@ -70,15 +72,20 @@ int	process_fork(t_basic *basic, t_cmd *cmd, int **fd)
 		if (pid < 0)
 			return (-2);
 		if (pid == 0)
+		{
 			execution(i, fd, &cmd[i], basic);
+			exit(0);
+		}
+		pids[i] = pid;
 		i++;
 	}
 	return (0);
 }
 
-void	wait_process(t_basic *basic, int **fd)
+void	wait_process(t_basic *basic, int **fd, pid_t *pids)
 {
 	int	i;
+	int	status;
 
 	i = 0;
 	while (i < basic->pipe_num)
@@ -89,21 +96,25 @@ void	wait_process(t_basic *basic, int **fd)
 	i = 0;
 	while (i <= basic->pipe_num)
 	{
-		waitpid(-1, &basic->exit_status, 0);
+		waitpid(pids[i], &status, 0);
 		i++;
 	}
-	if (basic->exit_status == 13)
-		basic->exit_status = 0;
+	if (WIFEXITED(status))
+		basic->exit_status = WEXITSTATUS(status);
+	else if (WIFSIGNALED(status)) 
+		basic->exit_status = 128 + WTERMSIG(status);
 	i = 0;
 	while (i < basic->pipe_num)
 		free (fd[i++]);
 	free(fd);
+	free(pids);
 }
 
 int	main_exec(t_basic *basic, t_cmd *cmd )
 {
-	int	**fd;
-	int	i;
+	int		**fd;
+	int		i;
+	pid_t	*pids;
 
 	i = 0;
 	fd = malloc(sizeof(int *) * basic->pipe_num);
@@ -121,8 +132,9 @@ int	main_exec(t_basic *basic, t_cmd *cmd )
 		if (pipe(fd[i++]) < 0)
 			return (-1);
 	}
-	if (process_fork(basic, cmd, fd) == -2)
+	pids = malloc(sizeof(pid_t) * (basic->pipe_num + 1));
+	if (process_fork(basic, cmd, fd, pids) == -2)
 		return (-2);
-	wait_process(basic, fd);
+	wait_process(basic, fd, pids);
 	return (0);
 }

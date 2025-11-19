@@ -6,7 +6,7 @@
 #    By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/23 14:33:21 by snegi             #+#    #+#              #
-#    Updated: 2024/05/14 12:48:41 by teichelm         ###   ########.fr        #
+#    Updated: 2025/11/19 14:55:06 by teichelm         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,11 +20,14 @@ LDFLAG		=	-lreadline -lhistory
 
 HEADER	 	=	minshell.h
 
-SRCS		=	minishell.c minishell_utl.c env.c multi_pipe.c export.c echo.c redirection.c supporting_fun.c execution.c cmd.c expander1.c expander2.c expander3.c input_check1.c input_check2.c input_check3.c parser1.c parser2.c parser3.c parser4.c parser5.c
+SRC_DIR= src
 
+FULL_SRC= $(addprefix $(SRC_DIR)/, $(SRCS) )
+
+SRCS		=	minishell_utl.c echo.c check.c modify_env.c parser_helpers.c parse_redirections.c remover.c split_cmds.c unset.c calculate_redirections.c minishell.c supporting_fun.c env.c export.c execution.c redirection.c multi_pipe.c parser.c expander.c
 LIBFT		=	libft.a
 
-OBJS		=	$(SRCS:.c=.o)
+OBJS		=	$(FULL_SRC:.c=.o)
 
 all:			$(NAME)
 

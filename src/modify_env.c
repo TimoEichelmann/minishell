@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell_utl.c                                    :+:      :+:    :+:   */
+/*   modify_env.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: teichelm <teichelm@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/03/26 11:31:43 by snegi             #+#    #+#             */
-/*   Updated: 2024/05/14 12:30:36 by teichelm         ###   ########.fr       */
+/*   Created: 2024/06/04 13:15:16 by teichelm          #+#    #+#             */
+/*   Updated: 2025/11/19 14:52:38 by teichelm         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../inc/minishell.h"
 
-void	change_pwd(char **env)
+int	change_pwd(char **env)
 {
 	char	*pwd;
 	char	*old_pwd;
@@ -24,52 +24,46 @@ void	change_pwd(char **env)
 	pwd = ft_strjoin("PWD=", pwd);
 	old_pwd = ft_strjoin("OLDPWD=", old_pwd);
 	free(temp);
-	ft_export(&env, pwd);
-	ft_export(&env, old_pwd);
+	ft_export(&env, NULL, pwd);
+	ft_export(&env, NULL, old_pwd);
 	free(pwd);
 	free(old_pwd);
-}
-
-int	maintain_cd(char *input, char **env)
-{
-	int	i;
-
-	i = 0;
-	while (*input != '\0' && *input == ' ')
-		input++;
-	if (!*input)
-		input = ft_getenv(env, "HOME");
-	while (input[i])
-	{
-		if (input[i] == ' ')
-		{
-			printf("too many arguments\n");
-			return (1);
-		}
-		i++;
-	}
-	if (chdir(input) != 0)
-	{
-		perror("chdir");
-		return (1);
-	}
-	change_pwd(env);
 	return (0);
 }
 
-void	ft_pwd(t_basic *basic)
+int	modify_pwd(char **env, char *pwd)
 {
-	char	**ev;
+	int		i;
+	char	*name;
 
-	ev = basic->env;
-	while (*ev && ev[0] != NULL)
+	if (ft_strncmp(pwd, "PWD", 3) == 0)
+		name = ft_substr(pwd, 0, 3);
+	else
+		name = ft_substr(pwd, 0, 6);
+	i = 0;
+	while (env[i] && ft_strncmp(env[i], name, ft_strlen(name)) != 0)
+		i++;
+	free(name);
+	free(env[i]);
+	env[i] = ft_strdup(pwd);
+	return (0);
+}
+
+char	**modify_env(char **ev, int j, int i, char **cmd)
+{
+	int	r;
+
+	r = 0;
+	if (!ev[j])
+		ev = add_var(ev, cmd[i], j);
+	else
 	{
-		if (strncmp(*ev, "PWD=", 4) == 0)
-		{
-			printf("%s\n", *ev + 4);
-			return ;
-		}
-		ev++;
+		while (cmd[i][r] && cmd[i][r] != '=')
+			r++;
+		if (!cmd[i][r])
+			return (ev);
+		free(ev[j]);
+		ev[j] = ft_strdup(cmd[i]);
 	}
-	printf("PWD not found\n");
+	return (ev);
 }
